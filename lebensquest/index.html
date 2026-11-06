@@ -1,0 +1,224 @@
+<!doctype html><html lang="de-CH"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lebensquest</title><style>
+*{box-sizing:border-box}body{margin:0;background:#10111c;color:#f7f4ff;font:1rem/1.55 system-ui,sans-serif}main{max-width:890px;margin:auto;padding:24px clamp(14px,4vw,36px)}header{position:relative;overflow:hidden;border-radius:28px;padding:clamp(24px,6vw,52px);background:radial-gradient(ellipse at 90% 0%,#743ba1,transparent 65%),linear-gradient(130deg,#282049,#17192f)}.kicker{letter-spacing:.15em;color:#d9fc88;font-size:.8rem;font-weight:850}h1{font-size:clamp(2.7rem,8vw,5.2rem);line-height:.98;letter-spacing:-.06em;margin:12px 0}header p{max-width:500px;margin-bottom:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.stats div{background:#22243a;padding:10px;border-radius:14px;font-size:.83rem}.stats strong{display:block;color:#dcff90;font-size:clamp(.94rem,3vw,1.5rem)}section{background:#202238;border:1px solid #3a3c55;border-radius:22px;padding:clamp(16px,4vw,30px)}h2{margin:6px 0;font-size:clamp(1.5rem,5vw,2.3rem);line-height:1.12}p{margin:12px 0}.choices{display:grid;gap:9px;margin-top:20px}button{font:inherit;text-align:left;color:inherit;background:#30324c;border:1px solid #50536e;border-radius:13px;padding:12px 15px;cursor:pointer;min-height:44px}button:not(:disabled):hover{border-color:#dcff90}button:focus-visible{outline:3px solid #dcff90;outline-offset:3px}button:disabled{opacity:.65;cursor:default}button strong,button small{display:block}small,summary{color:#d3cfe3}.next{background:#dcff90;color:#151b0a;font-weight:800;border-color:transparent}.receipt{border-left:4px solid #dcff90;padding-left:14px}.track{height:6px;width:100%;accent-color:#dcff90}details{margin-top:16px}summary{cursor:pointer}li{margin:8px 0}.footer{color:#d3cfe3;font-size:.82rem}
+
+.help{margin-top:16px;padding:0 14px 14px;background:#282944;border-radius:14px}.help summary{padding-top:12px;font-weight:750}.lesson{border-top:1px solid #50536e;margin-top:12px;padding-top:12px}.lesson h3{margin:0}.lesson label{display:block}.lesson input{width:100%;accent-color:#dcff90}.lesson meter{display:block;width:100%;height:16px;accent-color:#dcff90}.lesson output{font-weight:750}.lesson button{margin-top:8px}.lesson .caption{min-height:3em}
+
+.scene-art{margin:0 0 18px;border-radius:16px;overflow:hidden;background:#151629}.scene-art svg{display:block;width:100%;height:auto}.scene-art figcaption{padding:9px 13px;color:#e6def8;font-size:.9rem}.scene-art .face{transition:fill .25s}.scene-art text{font-family:system-ui,sans-serif}
+</style>
+<main><header><div class="kicker">LEBENSQUEST / CHF</div><h1>Ein Leben.<br>Deine Züge.</h1><p>Von der Geburt bis zum letzten Kapitel. Was bleibt von deinen Entscheidungen?</p></header>
+<div class="stats"><div>Alter<strong id="age"></strong></div><div>Vermögen¹<strong id="worth"></strong></div><div>Schulden<strong id="debt"></strong></div></div>
+<progress class="track" id="progress" max="8" value="0" aria-label="Lebensverlauf"></progress>
+<section><figure class="scene-art" id="art"></figure><div class="kicker" id="chapter"></div><h2 id="title" tabindex="-1"></h2><p id="story"></p><div id="result" class="receipt" aria-live="polite"></div><details class="help" id="help" hidden><summary>💡 Entscheidungshilfe öffnen</summary><p id="hint"></p>
+<div class="lesson" id="lesson" hidden>
+<h3>Mini-Erklärfilm · Zinsen auf Zinsen</h3>
+<p>Du startest mit 1’000 CHF. Im Beispiel kommen jedes Jahr 5 % dazu. Du zahlst kein zusätzliches Geld ein.</p>
+<label for="year">Zeitleiste · <output id="year-label"></output></label>
+<input id="year" type="range" min="0" max="20" value="0">
+<label for="compound">Zinsen bleiben angelegt · <output id="compound-label"></output></label>
+<meter id="compound" min="0" max="2700" value="1000"></meter>
+<label for="simple">Zinsen werden beiseitegelegt · <output id="simple-label"></output></label>
+<meter id="simple" min="0" max="2700" value="1000"></meter>
+<p class="caption" id="caption"></p>
+<button type="button" class="next" id="play">▶ Abspielen</button>
+<button type="button" id="replay">↺ Von vorn</button>
+<p><small>Beide Balken zeigen den Gesamtbetrag inklusive der Zinsen. Die 5 % sind eine Rechenannahme. Die Rendite einer Anlage kann schwanken und auch negativ sein.</small></p>
+</div></details><div class="choices" id="choices"></div><details id="journal"><summary>Dein Lebensbuch</summary><ol id="log"></ol></details></section>
+<p class="footer">¹ Bargeld + Anlagen − Schulden. Fiktive Beträge und vereinfachte Lebensphasen. Anlagen können an Wert verlieren. Konkurs ist hier ein vereinfachtes Spielende.</p></main>
+<script>
+const el=id=>document.getElementById(id);
+const chf=n=>new Intl.NumberFormat('de-CH').format(n)+' CHF';
+let state,step;
+const worth=()=>state.cash+state.invest-state.debt;
+function spend(n){
+ const paid=Math.min(state.cash,n);
+ state.cash-=paid;
+ state.debt+=n-paid;
+ return n-paid;
+}
+function earn(n){state.cash+=n}
+const scenes=[
+ [0,'Hallo, Niki','Du kommst zur Welt. Deine Familie eröffnet ein Sparkonto und legt bis zu deinem 15. Geburtstag insgesamt 500 CHF für dich zurück.',[
+ ['15 Jahre vorspulen',()=>{earn(500);return 'Deine erste Chance, selbst über Geld zu entscheiden.'}]]],
+ [15,'Das erste eigene Geld','Du verdienst in den Ferien 300 CHF. Ein neues Handy kostet 650 CHF. Dein altes funktioniert noch.',[
+ ['Handy kaufen · 650 CHF',()=>{earn(300);spend(650);return 'Du hast ein neues Handy und noch 150 CHF für den nächsten Abschnitt.'}],
+ ['Handy behalten · 300 CHF sparen',()=>{earn(300);return 'Du hast 800 CHF auf der Seite. Ein Teil davon kann deinen nächsten Schritt finanzieren.'}]]],
+ [19,'Die Weiche','Du kannst eine Weiterbildung machen, direkt arbeiten oder ein Business-Coaching buchen, das schnellen Reichtum verspricht.',[
+ ['Weiterbildung · 600 CHF',()=>{state.training=true;const loan=spend(600);return 'Du erwirbst eine Qualifikation. Ab 30 bleibt dir im Spiel mehr vom Einkommen übrig.'+(loan?' Dafür nimmst du '+chf(loan)+' Schulden auf.':' Du bezahlst den Kurs aus deinen Ersparnissen.')}],
+ ['Direkt arbeiten · 1’000 CHF zurücklegen',()=>{earn(1000);return 'Du hast sofort mehr Geld und Berufserfahrung. Deine spätere Sparrate im Spiel ist tiefer.'}],
+ ['Coaching buchen · 2’000 CHF',()=>{const loan=spend(2000);return 'Das Coaching bringt keine Aufträge. Du startest mit '+chf(loan)+' Schulden in den nächsten Abschnitt.'}]]],
+ [30,'Der erste grosse Plan',()=> 'Nach Lohn und Lebenshaltungskosten konntest du bis heute '+chf(state.training?36000:20000)+' zurücklegen. Jetzt steht eine Entscheidung an.',[
+ ['Breit gestreut anlegen · 15’000 CHF',()=>{state.cash-=15000;state.invest=15000;return 'Du hast 15’000 CHF investiert. Bei einem Kursrückgang kann der Wert sinken, während dein übriges Geld verfügbar bleibt.'}],
+ ['30’000 CHF für ein Café auf Kredit aufnehmen',()=>{state.debt+=30000;state.cafe=true;return 'Du eröffnest dein eigenes Café. Die 30’000 CHF stecken im Betrieb und erscheinen im Spiel erst beim Verkauf wieder als Vermögen.'}],
+ ['Liquid bleiben · Geld auf dem Konto behalten',()=> 'Dein Geld ist für unerwartete Ausgaben verfügbar. Im Spiel bringt es auf dem Konto keinen Zins.']],
+ ()=>earn(state.training?36000:20000)],
+ [42,'Das Jahr, in dem alles kippt',()=>state.cafe?'Vor deinem Café wird monatelang gebaut. Der Umsatz bricht ein. Für den Weiterbetrieb brauchst du 18’000 CHF.':state.invest?'Deine Anlagen fallen von 15’000 auf 10’500 CHF. Gleichzeitig steht eine unerwartete Rechnung über 12’000 CHF an.':'Eine unerwartete Rechnung über 12’000 CHF kommt genau in dem Monat, in dem dein Einkommen wegfällt.',()=>state.cafe?[
+ ['Café offen halten · 18’000 CHF zahlen',()=>{const loan=spend(18000);state.keptCafe=true;return 'Du hältst den Betrieb am Leben.'+(loan?' Dafür kommen '+chf(loan)+' Schulden hinzu.':' Du finanzierst den Engpass aus deinem Guthaben.')+' Ob sich das auszahlt, zeigt sich später.'}],
+ ['Café verkaufen · 12’000 CHF Erlös',()=>{earn(12000);repay();return 'Der Verkaufserlös hilft beim Tilgen. Der Betrieb ist verkauft und künftige Gewinne fallen weg.'}]
+ ]:[
+ ['Rechnung aus verfügbaren Mitteln zahlen',()=>{const loan=spend(12000);return loan?'Du musst '+chf(loan)+' leihen. Eine grössere Geldreserve hätte diesen Betrag gesenkt.':'Dein Guthaben fängt den Schock ab. Deine Anlagen musst du dafür nicht anfassen.'}],
+ ...(state.invest?[['Anlagen zum tiefen Kurs verkaufen',()=>{earn(state.invest);state.invest=0;spend(12000);return 'Der Kursverlust ist jetzt endgültig. Der Verkauf hilft, die Rechnung zu bezahlen. An einer späteren Erholung nimmst du nicht mehr teil.'}]]:[]),
+ ['Rechnung auf Raten · 14’000 CHF insgesamt',()=>{state.debt+=14000;return 'Du behältst heute dein Bargeld. Die Raten kosten dich insgesamt 2’000 CHF mehr.'}]
+ ],()=>{if(state.invest)state.invest=10500}],
+ [53,'Eine zweite Chance',()=> (state.keptCafe?'Dein Café erholt sich. Beim Verkauf erhältst du 125’000 CHF. ':'')+'Seit der Krise hast du '+chf(state.training?160000:100000)+' zurückgelegt. Wie nutzt du die nächsten 15 Jahre?',[
+ ['Schulden tilgen und langfristig anlegen',()=>{repay();const amount=Math.floor(state.cash*.75);state.cash-=amount;state.invest+=amount;state.strategy='steady';return 'Du investierst '+chf(amount)+' und behältst '+chf(state.cash)+' verfügbar. Der Ausgang hängt davon ab, wie sich die Anlagen entwickeln.'}],
+ ['Eine Firma mit einem Kredit von 550’000 CHF aufbauen',()=>{state.debt+=550000;state.strategy='firm';return 'Die Firma kann viel wert werden. Scheitert sie, bleibt der Kredit bei dir. Dein bisheriger Weg beeinflusst, wie viele Aufträge du gewinnen kannst.'}],
+ ['Schulden tilgen und Geld verfügbar halten',()=>{repay();state.strategy='cash';return 'Du kannst auf dein Guthaben zugreifen. Der Betrag wächst in dieser Phase nur durch das, was du zusätzlich zurücklegst.'}]
+ ],()=>{earn(state.training?160000:100000);if(state.keptCafe)earn(125000)}],
+ [68,'Die Rechnung geht auf?',()=>state.retirement+' Wie planst du die nächsten Jahre?',[
+ ['Einfacher leben · 45’000 CHF ausgeben',()=>{spend(45000);return 'Du planst mit tieferen Ausgaben und behältst mehr Spielraum.'}],
+ ['Mehr reisen und geniessen · 110’000 CHF ausgeben',()=>{spend(110000);return 'Du erfüllst dir Reisewünsche. Für spätere Ausgaben bleibt entsprechend weniger übrig.'}]
+ ],()=>{
+  earn(state.training?210000:150000);
+  if(state.strategy==='firm'){
+   const success=state.training||state.keptCafe;
+   earn(success?1650000:100000);
+   repay();
+   state.retirement=success?'Deine Firma gewinnt grosse Aufträge. Beim Verkauf bringt sie 1’650’000 CHF. Der Kredit wird aus deinen Mitteln getilgt.':'Die Grossaufträge bleiben aus. Für die Firma bekommst du nur 100’000 CHF. Du verwendest dein Guthaben zur Tilgung, aber ein Teil der Schulden bleibt offen.';
+  }else{
+   state.invest=Math.round(state.invest*1.6);
+   state.retirement=state.invest?'In dieser Spielrunde haben sich deine Anlagen bis zum Ruhestand erholt und sind um 60 % gewachsen.':'Du erreichst den Ruhestand mit deinem verfügbaren Guthaben.';
+  }
+ }],
+ [82,'Was dir wichtig ist','In deinen letzten Jahren brauchst du Unterstützung. Du kannst eine einfachere Lösung wählen oder länger mit zusätzlicher Hilfe zu Hause bleiben.',[
+ ['Unterstützung organisieren · 35’000 CHF',()=>{spend(35000);return 'Du organisierst Unterstützung und hältst deine Ausgaben tiefer.'}],
+ ['Länger zu Hause bleiben · 85’000 CHF',()=>{spend(85000);return 'Du finanzierst mehr Hilfe und kannst länger in deiner vertrauten Umgebung wohnen.'}]
+ ]]
+];
+const hints={
+ 1:'Frag dich vor dem Kauf: Wie viel bleibt danach übrig? Und wie lange reicht mein altes Handy noch?',
+ 2:'Vergleiche die Kosten heute mit den möglichen Vorteilen in ein paar Jahren. Was weisst du über den Kurs, bevor du zahlst?',
+ 3:'Rechne zuerst aus, wie viel Bargeld nach deiner Wahl für eine unerwartete Rechnung bleibt. Der Mini-Erklärfilm zeigt, was Zeit beim Anlegen verändern kann.',
+ 4:'Vergleiche die Gesamtkosten. Die Raten kosten 2’000 CHF extra. Ein Verkauf während des Kurstiefs bringt Bargeld, aber dieses Geld kann bei einer Erholung nicht mehr mitwachsen.',
+ 5:'Frag dich beim Firmenkredit: Wie viel kann ich zurückzahlen, wenn der Verkauf wenig einbringt? Beim Anlegen kannst du im Mini-Erklärfilm vergleichen, was passiert, wenn die Erträge angelegt bleiben.',
+ 6:'Rechne aus, wie viel nach der gewählten Ausgabe für die nächsten Jahre bleibt. Wie viel Spielraum möchtest du behalten?',
+ 7:'Schau auf Vermögen und Schulden. Die günstigere Lösung lässt dir mehr Geld. Die teurere erfüllt den Wunsch, länger zu Hause zu bleiben.'
+};
+let timer=null;
+function stopFilm(){
+ if(timer!==null)clearInterval(timer);
+ timer=null;el('play').textContent='▶ Abspielen';
+}
+function drawFilm(){
+ const year=Number(el('year').value);
+ const compound=1000*1.05**year;
+ const simple=1000+50*year;
+ const amount=n=>new Intl.NumberFormat('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)+' CHF';
+ el('year-label').textContent='Jahr '+year+' / 20';
+ el('compound').value=compound;el('simple').value=simple;
+ el('compound-label').textContent=amount(compound);el('simple-label').textContent=amount(simple);
+ const captions={
+  0:'Beide starten mit genau 1’000 CHF.',
+  1:'Im ersten Jahr sind es bei beiden 50 CHF Zinsen.',
+  2:'Im zweiten Jahr gibt es oben 5 % auf 1’050 CHF. Das ergibt 52.50 CHF statt 50 CHF.',
+  20:'Nach 20 Jahren hast du oben '+amount(compound-simple)+' mehr. Auch die früheren Zinsen haben Zinsen gebracht.'
+ };
+ el('caption').textContent=captions[year]??'Bis jetzt sind durch das Wiederanlegen '+amount(compound-simple)+' mehr zusammengekommen.';
+}
+el('play').onclick=()=>{
+ if(timer!==null){stopFilm();return}
+ if(Number(el('year').value)===20){el('year').value=0;drawFilm()}
+ el('play').textContent='⏸ Pause';
+ timer=setInterval(()=>{
+  const year=Number(el('year').value)+1;
+  el('year').value=year;drawFilm();
+  if(year===20)stopFilm();
+ },1600);
+};
+el('replay').onclick=()=>{stopFilm();el('year').value=0;drawFilm();el('play').focus()};
+el('year').oninput=()=>{stopFilm();drawFilm()};
+el('help').ontoggle=()=>{if(!el('help').open)stopFilm()};
+function prepareHelp(){
+ stopFilm();
+ el('help').open=false;el('help').hidden=!hints[step];
+ el('hint').textContent=hints[step]??'';
+ el('lesson').hidden=step!==3&&step!==5;
+ el('year').value=0;drawFilm();
+}
+function repay(){const n=Math.min(state.cash,state.debt);state.cash-=n;state.debt-=n}
+function totals(){
+ el('age').textContent=step===scenes.length?'90 Jahre':scenes[step][0]+' Jahre';
+ el('worth').textContent=chf(worth());
+ el('debt').textContent=chf(state.debt);
+ el('progress').value=step;
+}
+function button(label,action,next=false){
+ const b=document.createElement('button');b.textContent=label;b.onclick=action;
+ if(next)b.className='next';
+ el('choices').append(b);return b;
+}
+const art=[
+ ['#454583','#a880c8','✦','Ein Stern über Nikis Kinderzimmer','Ein neuer Anfang'],
+ ['#563a85','#d589ad','♫','Musik und ein Handy im Jugendzimmer','Neugierig'],
+ ['#234d71','#64b8b9','↗','Ein Wegweiser an einer Kreuzung','Unentschlossen'],
+ ['#653f63','#e9a572','☕','Eine Tasse im warmen Abendlicht','Voller Tatendrang'],
+ ['#293854','#7487ad','ϟ','Ein Gewitter über der Stadt','Angespannt'],
+ ['#3e4f68','#99c696','✦','Ein Lichtblick am Horizont','Hoffnungsvoll'],
+ ['#684855','#f0a477','☀','Ein Sonnenuntergang im Ruhestand','Nachdenklich'],
+ ['#37565a','#8fbca3','⌂','Ein Zuhause im Grünen','Verletzlich'],
+ ['#3c385e','#b3a1db','✦','Ein Sternenhimmel über Nikis letztem Kapitel','Ein Leben voller Entscheidungen']
+];
+const reactions=[
+ [['Geborgen','Ein kleiner Anfang für später.',1]],
+ [['Begeistert','Endlich mein neues Handy!',1],['Stolz','Ich kann warten. Das fühlt sich gut an.',1]],
+ [['Entschlossen','Ich probiere etwas Neues.',1],['Zuversichtlich','Jetzt verdiene ich mein eigenes Geld.',1],['Enttäuscht','Ich hatte mir mehr davon versprochen.',-1]],
+ [['Gespannt','Wie entwickelt sich meine Anlage?',0],['Aufgeregt','Mein eigenes Café!',1],['Ruhig','Mein Geld bleibt griffbereit.',1]],
+ [],
+ [['Erleichtert','Jetzt kann ich wieder nach vorn schauen.',1],['Nervös','Was, wenn die Aufträge ausbleiben?',-1],['Ruhig','Ich will vorerst flexibel bleiben.',1]],
+ [['Zufrieden','Ich möchte mir Spielraum lassen.',1],['Vorfreude','Darauf habe ich lange gewartet.',1]],
+ [['Dankbar','Gut, dass ich Unterstützung bekomme.',1],['Erleichtert','Ich kann zu Hause bleiben.',1]]
+];
+function crisisReaction(index){
+ if(state.cafe)return index===0?['Besorgt','Hoffentlich kommen die Gäste zurück.',-1]:['Wehmütig','Es ist schwer, mein Café loszulassen.',-1];
+ return index===0?['Überrumpelt','Damit habe ich nicht gerechnet.',-1]:['Unsicher','Ich hoffe, dass das Geld danach reicht.',-1];
+}
+function illustrate(reaction){
+ const [sky,horizon,symbol,description,initial]=art[step];
+ const [mood,thought,feeling]=reaction??[initial,'',0];
+ const older=step>=6;
+ const mouth=feeling===1?'M 69 91 Q 81 103 93 91':feeling===-1?'M 69 96 Q 81 84 93 96':'M 72 94 H 90';
+ el('art').innerHTML=`<svg viewBox="0 0 640 180" role="img" aria-label="${description}. Niki wirkt ${mood.toLowerCase()}.">
+ <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="${horizon}"/></linearGradient></defs>
+ <path fill="url(#sky)" d="M0 0h640v180H0z"/><circle cx="490" cy="67" r="45" fill="#fff1c2" opacity=".22"/>
+ <path d="M0 153 110 89 205 137 310 73 426 136 554 102 640 130V180H0Z" fill="#202139" opacity=".55"/>
+ <path d="M0 166Q155 135 280 161T640 155V180H0Z" fill="#17192c"/>
+ <text x="491" y="87" text-anchor="middle" font-size="50" fill="#fff5d6">${symbol}</text>
+ <g transform="translate(233 16)">
+ <path d="M16 164Q22 112 81 110Q140 112 146 164Z" fill="${step===4?'#647da1':'#b3d881'}"/>
+ <circle class="face" cx="81" cy="75" r="44" fill="#eeb28e"/>
+ <path d="M37 76Q29 22 79 24Q130 25 125 76L111 62 98 45Q81 66 44 63Z" fill="${older?'#e4e0e9':'#372638'}"/>
+ <circle cx="64" cy="78" r="3.5" fill="#332236"/><circle cx="98" cy="78" r="3.5" fill="#332236"/>
+ <path d="${mouth}" fill="none" stroke="#613b49" stroke-width="3" stroke-linecap="round"/>
+ </g></svg><figcaption></figcaption>`;
+ el('art').querySelector('figcaption').textContent=thought?'Niki · '+mood+' — «'+thought+'»':'Niki · '+mood;
+}
+function render(){
+ prepareHelp();illustrate();
+ el('choices').replaceChildren();el('result').textContent='';
+ if(step===scenes.length){
+  const n=worth();
+  el('chapter').textContent='LETZTES KAPITEL · 90 JAHRE';
+  illustrate(n<0?['Bedrückt','Die Schulden haben mich lange begleitet.',-1]:['Nachdenklich','So viele kleine Entscheidungen, so viele Wendungen.',1]);
+  el('title').textContent=n>=1000000?'Millionär':n<0?'Konkurs im Spiel':n>=250000?'Mit einem Polster':'Mit kleinem Spielraum';
+  el('story').textContent='Nikis Leben endet mit 90. Die Schlussbilanz beträgt '+chf(n)+'. Welche Entscheidung hat den grössten Unterschied gemacht? Wähle in der nächsten Runde einen anderen Weg und vergleiche.';
+  button('Ein neues Leben starten',start,true);
+ }else{
+  const [age,title,story,options,enter]=scenes[step];enter?.();
+  el('chapter').textContent='KAPITEL '+(step+1)+' / '+scenes.length+' · '+age+' JAHRE';
+  el('title').textContent=title;el('story').textContent=typeof story==='function'?story():story;
+  const available=typeof options==='function'?options():options;
+  for(const [index,[label,action]] of available.entries()){
+   button(label,()=>{
+    const before=worth(), explanation=action(), delta=worth()-before;
+    const impact=delta===0?'Vermögen in diesem Zug unverändert.':'Vermögen in diesem Zug '+(delta>0?'+':'−')+chf(Math.abs(delta))+'.';
+    illustrate(step===4?crisisReaction(index):reactions[step][index]);
+    el('result').textContent=explanation+' '+impact;
+    const li=document.createElement('li');li.textContent=age+' Jahre · '+label+' — '+explanation;el('log').append(li);
+    totals();el('choices').replaceChildren();button('Weiter →',()=>{step++;render()},true).focus();
+   });
+  }
+ }
+ totals();el('title').focus();
+}
+function start(){state={cash:0,debt:0,invest:0};step=0;el('log').replaceChildren();el('journal').open=false;render()}
+start();
+</script></html>
