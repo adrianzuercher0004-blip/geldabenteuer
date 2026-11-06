@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - Geldabenteuer-GitHub.zip
+      - lebensquest/index.html
       - .github/workflows/pages.yml
   workflow_dispatch:
 permissions:
@@ -30,6 +31,8 @@ jobs:
           python -m zipfile -e Geldabenteuer-GitHub.zip _site
           test -f _site/index.html
           test -f _site/Raiffi-Lernvideo-Schweizerstimme-v2.mp4
+      - name: Lebensquest hinzufügen
+        run: install -D lebensquest/index.html _site/lebensquest/index.html
       - name: Pages vorbereiten
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
       - name: Spiel hochladen
