@@ -168,7 +168,7 @@ const chapters=[];
 for(const [phase,scene] of scenes.entries()){
  chapters.push({phase,scene});
  for(const [after,age,title,story,choices,income=0] of extra.filter(chapter=>chapter[0]===phase)){
-  chapters.push({phase,mini:true,scene:[age,title,story,()=>(typeof choices==='function'?choices():choices).map(([label,delta,explanation,flag])=>[label,()=>{
+  chapters.push({phase,mini:true,previewChoices:choices,scene:[age,title,story,()=>(typeof choices==='function'?choices():choices).map(([label,delta,explanation,flag])=>[label,()=>{
    if(delta>0)earn(delta);
    const borrowed=delta<0?spend(-delta):0;
    if(flag==='invest'){state.cash-=6000;state.invest+=6000}
@@ -289,6 +289,32 @@ const sceneImages={
  77:['🏠','📦','Wohnung und Umzugskarton'],
  86:['📖','💛','Lebensbuch und ein Geschenk an die nächste Generation']
 };
+function missionScene(age,title){
+ if(title==='Zwei Briefe, zwei Wege')return ['POST FÜR NIKI','Lehrbetrieb','Wir bieten dir eine Lehrstelle an.','Gymnasium','Dein Schulplatz ist bestätigt.'];
+ if(age===26)return ['KURSPLATZ BIS FREITAG','Kursleitung','Dienstag und Donnerstag · 18 Uhr','Dein Schichtplan','An beiden Abenden arbeitest du.'];
+ if(age===29)return ['DEINE PLÄNE','Zeit','Wie möchtest du deinen Alltag gestalten?','Budget','Wofür möchtest du Geld einplanen?'];
+ if(age===31)return state.family?
+  ['DEIN WOCHENPLAN','Kita','Donnerstag · kein Platz frei','Betrieb','Neuer Wochenplan bis morgen.']:
+  ['DEIN WOCHENPLAN','Betrieb','Ein freier Tag pro Woche wäre möglich.','Dein Budget','Weniger Pensum heisst weniger Lohn.'];
+}
+function illustrateMission([heading,first,firstText,second,secondText]){
+ el('art').innerHTML=`<svg viewBox="0 0 640 260" role="img" aria-label="${heading}. ${firstText} ${secondText}">
+  <rect width="640" height="260" fill="#26254b"/>
+  <circle cx="70" cy="215" r="120" fill="#564681"/>
+  <circle cx="590" cy="55" r="100" fill="#395a62"/>
+  <text x="50" y="44" fill="#dcff90" font-size="24" font-weight="800">${heading}</text>
+  <g class="notification">
+   <rect x="50" y="64" width="540" height="73" rx="14" fill="#3a3861"/>
+   <text x="70" y="92" fill="#dcff90" font-size="22" font-weight="700">${first}</text>
+   <text x="70" y="120" fill="#fff" font-size="22">${firstText}</text>
+  </g>
+  <g class="notification">
+   <rect x="50" y="151" width="540" height="73" rx="14" fill="#dcff90"/>
+   <text x="70" y="179" fill="#151b0a" font-size="22" font-weight="700">${second}</text>
+   <text x="70" y="207" fill="#151b0a" font-size="22">${secondText}</text>
+  </g>
+ </svg>`;
+}
 function illustrate(reaction){
  if(chapters[step]?.scene[0]===15){
   el('art').innerHTML=`<svg viewBox="0 0 640 260" role="img" aria-label="Handy mit fast leerem Akku und zwei Nachrichten aus dem Teamchat">
@@ -313,6 +339,8 @@ function illustrate(reaction){
 
  const [sky,horizon,symbol,description,initial]=art[phaseNow()];
  const [age,title]=chapters[step]?.scene??[];
+ const panel=missionScene(age,title);
+ if(panel){illustrateMission(panel);return;}
  const image=title==='Zwei Briefe, zwei Wege'?['✉️','🎓','Lehrvertrag und Zusage fürs Gymnasium']:
   age===16?['🎧','🧾','Kopfhörer und Rechnung fürs Musikabo']:
   age===31&&!state.family?['🗓️','⏳','Wochenkalender und freie Zeit']:
@@ -341,39 +369,45 @@ const phonePlans=[
  {id:'buy',label:'Gebrauchtes Handy kaufen',cost:650,note:'Du hast sofort ein funktionierendes Handy und weniger Geld für später.'},
  {id:'borrow',label:'Handy ausleihen',cost:0,note:'Du sparst das Geld. Am Freitag musst du das Handy zurückgeben und den Treffpunkt vorher abmachen.'}
 ];
-function phoneMission(commit){
+function previewMission(plans,commit){
  const mission=el('mission');
  mission.innerHTML='<fieldset class="mission"><legend>Teste deinen Plan</legend><div></div><progress aria-label="Geld nach der Auswahl"></progress><output aria-live="polite"></output></fieldset>';
  const list=mission.querySelector('fieldset div');
  const bar=mission.querySelector('progress');
  const preview=mission.querySelector('output');
- const confirm=button('Plan festlegen',()=>commit(selected.label,()=>{
-  spend(selected.cost);
-  state.phone=selected.id;
-  return selected.note;
- }),true);
- confirm.disabled=true;
  let selected;
- bar.max=state.cash;
+ const confirm=button('Plan festlegen',()=>commit(selected.label,selected.action,selected.index),true);
+ confirm.disabled=true;
+ bar.max=Math.max(1,state.cash+Math.max(0,...plans.map(plan=>plan.delta)));
  bar.value=state.cash;
  preview.textContent='Verfügbar · '+chf(state.cash);
- for(const plan of phonePlans){
+ for(const plan of plans){
   const label=document.createElement('label');
   const radio=document.createElement('input');
   radio.type='radio';
-  radio.name='phone-plan';
+  radio.name='mission-plan';
   radio.onchange=()=>{
    selected=plan;
-   bar.value=state.cash-plan.cost;
-   preview.textContent='Übrig · '+chf(bar.value)+' · '+plan.note;
+   const balance=state.cash+plan.delta;
+   bar.value=Math.max(0,balance);
+   preview.textContent='Übrig · '+chf(bar.value)+(balance<0?' · Neue Schulden '+chf(-balance):'')+' · '+plan.note;
    preview.classList.remove('budget-change');
    void preview.offsetWidth;
    preview.classList.add('budget-change');
    confirm.disabled=false;
   };
-  label.append(radio,plan.label+' · '+chf(plan.cost));
+  label.append(radio,plan.label);
   list.append(label);
  }
+}
+function phoneMission(commit){
+ previewMission(phonePlans.map(({id,label,cost,note})=>({
+  label:label+' · '+chf(cost),delta:-cost,note,action:()=>{
+   spend(cost);
+   state.phone=id;
+   return note;
+  }
+ })),commit);
 }
 function render(){
  prepareHelp();illustrate();
@@ -390,7 +424,7 @@ function render(){
   el('result').textContent='Dieser Durchlauf · '+summary+(previousRun?' | Vorheriger Durchlauf · '+previousRun:'');
   button('Ein neues Leben starten',()=>{previousRun=summary;start()},true);
  }else{
-  const {scene,phase,mini}=chapters[step];
+  const {scene,phase,mini,previewChoices}=chapters[step];
   const [age,title,story,options,enter]=scene;enter?.();
   el('chapter').textContent='KAPITEL '+(step+1)+' / '+chapters.length+' · '+age+' JAHRE';
   el('title').textContent=title;el('story').textContent=typeof story==='function'?story():story;
@@ -398,13 +432,16 @@ function render(){
   const commit=(label,action,index)=>{
     const before=worth(), explanation=action(), delta=worth()-before;
     const impact=delta===0?'Vermögen in diesem Zug unverändert.':'Vermögen in diesem Zug '+(delta>0?'+':'−')+chf(Math.abs(delta))+'.';
-    if(age!==15)illustrate(mini?[delta<0?'Nachdenklich':'Zuversichtlich',delta<0?'Das war mir etwas wert.':'Mal sehen, was daraus wird.',delta<0?0:1]:phase===4?crisisReaction(index):reactions[phase][index]);
+    if(age!==15&&!missionScene(age,title))illustrate(mini?[delta<0?'Nachdenklich':'Zuversichtlich',delta<0?'Das war mir etwas wert.':'Mal sehen, was daraus wird.',delta<0?0:1]:phase===4?crisisReaction(index):reactions[phase][index]);
     el('result').textContent=explanation+' '+impact;
     const li=document.createElement('li');li.textContent=age+' Jahre · '+label+' — '+explanation;el('log').append(li);
     totals();el('mission').replaceChildren();el('choices').replaceChildren();button('Weiter →',()=>{step++;render()},true).focus();
   };
   if(age===15)phoneMission(commit);
-  else for(const [index,[label,action]] of available.entries())button(label,()=>commit(label,action,index));
+  else if(missionScene(age,title)){
+   const choices=typeof previewChoices==='function'?previewChoices():previewChoices;
+   previewMission(choices.map(([label,delta,note],index)=>({label,delta,note,index,action:available[index][1]})),commit);
+  }else for(const [index,[label,action]] of available.entries())button(label,()=>commit(label,action,index));
  }
  totals();el('title').focus();
 }
