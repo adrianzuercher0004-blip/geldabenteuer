@@ -4,11 +4,23 @@
 .help{margin-top:16px;padding:0 14px 14px;background:#282944;border-radius:14px}.help summary{padding-top:12px;font-weight:750}.lesson{border-top:1px solid #50536e;margin-top:12px;padding-top:12px}.lesson h3{margin:0}.lesson label{display:block}.lesson input{width:100%;accent-color:#dcff90}.lesson meter{display:block;width:100%;height:16px;accent-color:#dcff90}.lesson output{font-weight:750}.lesson button{margin-top:8px}.lesson .caption{min-height:3em}
 
 .scene-art{margin:0 0 18px;border-radius:16px;overflow:hidden;background:#151629}.scene-art svg{display:block;width:100%;height:auto}.scene-art figcaption{padding:9px 13px;color:#e6def8;font-size:.9rem}.scene-art .face{transition:fill .25s}.scene-art text{font-family:system-ui,sans-serif}
+
+.mission{margin:16px 0;padding:16px;background:#181a30;border:1px solid #50536e;border-radius:16px}
+.mission legend{padding:0 7px;font-weight:800;color:#dcff90}
+.mission label{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer}
+.mission input,.mission progress{accent-color:#dcff90}
+.mission progress{display:block;width:100%;margin:12px 0}
+.mission output{display:block}
+.notification{animation:arrive .45s ease-out both}
+.notification + .notification{animation-delay:.22s}
+.budget-change{animation:arrive .25s ease-out}
+@keyframes arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.notification,.budget-change{animation:none}}
 </style>
 <main><header><div class="kicker">LEBENSQUEST / CHF</div><h1>Ein Leben.<br>Deine Züge.</h1><p>Von der Geburt bis zum letzten Kapitel. Was bleibt von deinen Entscheidungen?</p></header>
 <div class="stats"><div>Alter<strong id="age"></strong></div><div>Vermögen¹<strong id="worth"></strong></div><div>Schulden<strong id="debt"></strong></div></div>
 <progress class="track" id="progress" max="8" value="0" aria-label="Lebensverlauf"></progress>
-<section><figure class="scene-art" id="art"></figure><div class="kicker" id="chapter"></div><h2 id="title" tabindex="-1"></h2><p id="story"></p><div id="result" class="receipt" aria-live="polite"></div><details class="help" id="help" hidden><summary>💡 Entscheidungshilfe öffnen</summary><p id="hint"></p>
+<section><figure class="scene-art" id="art"></figure><div class="kicker" id="chapter"></div><h2 id="title" tabindex="-1"></h2><p id="story"></p><div id="mission"></div><div id="result" class="receipt" aria-live="polite"></div><details class="help" id="help" hidden><summary>💡 Entscheidungshilfe öffnen</summary><p id="hint"></p>
 <div class="lesson" id="lesson" hidden>
 <h3>Mini-Erklärfilm · Zinsen auf Zinsen</h3>
 <p>Du startest mit 1’000 CHF. Im Beispiel kommen jedes Jahr 5 % dazu. Du zahlst kein zusätzliches Geld ein.</p>
@@ -39,9 +51,7 @@ function earn(n){state.cash+=n}
 const scenes=[
  [0,'Hallo, Niki','Du kommst zur Welt. Deine Familie eröffnet ein Sparkonto und legt 500 CHF für deinen 15. Geburtstag zurück.',[
  ['Bis zum Flohmarkt mit 8 vorspulen',()=> 'Mit 8 entscheidest du zum ersten Mal selbst über dein Geld.']]],
- [15,'Das erste eigene Geld','Du verdienst in den Ferien 300 CHF. Ein neues Handy kostet 650 CHF. Dein altes funktioniert noch.',[
- ['Handy kaufen · 650 CHF',()=>{earn(300);spend(650);return 'Du hast ein neues Handy. Nach dem Kauf bleiben dir '+chf(state.cash)+' für den nächsten Abschnitt.'}],
- ['Handy behalten · 300 CHF sparen',()=>{earn(300);return 'Du hast '+chf(state.cash)+' auf der Seite. Ein Teil davon kann deinen nächsten Schritt finanzieren.'}]],()=>earn(500)],
+ [15,'Akku 3 %. Teamchat offen.','Heute Abend schliesst die Anmeldung fürs Turnier. Dein Handy geht ständig aus. Bis zum Wochenende brauchst du eine Lösung. Plane zuerst mit deinem Budget.',[],()=>earn(800)],
  [19,'Nach der Ausbildung',()=>state.apprentice?'Du hast deine Lehre abgeschlossen. Dein Betrieb bietet dir einen Einstiegsjob an. Oder du machst berufsbegleitend die Berufsmaturität.':'Nach der Matura hast du einen Studienplatz. Daneben liegt ein Angebot für ein bezahltes Praktikum.',()=>[
   [state.apprentice?'Berufsmaturität beginnen':'Studium beginnen',()=>{state.training=true;spend(600);return 'Du investierst 600 CHF in deinen nächsten Ausbildungsschritt. Im Spiel erhöht dieser Abschluss später deine Sparmöglichkeiten.'}],
   [state.apprentice?'Im Lehrbetrieb einsteigen':'Das Praktikum antreten',()=>{earn(1000);return 'Du sammelst Berufserfahrung und legst 1’000 CHF zurück.'}]
@@ -96,7 +106,7 @@ const extra=[
  [1,16,'Zwei Briefe, zwei Wege','Dein Schnupperbetrieb bietet dir eine Lehrstelle an. Gleichzeitig hast du einen Platz am Gymnasium. Welcher Weg passt zu dem, was du lernen möchtest?',[
  ['Lehrstelle annehmen',800,'Du lernst im Betrieb und legst im Spiel 800 CHF vom Lehrlingslohn zurück.','apprentice'],
  ['Ans Gymnasium gehen',0,'Du arbeitest auf die Matura hin und hältst dir den Weg zum Studium offen.']]],
- [1,17,'Ein Samstag mit zwei Plänen','Ein Laden zahlt dir 180 CHF für einen Zusatzjob. Gleichzeitig findet ein Turnier mit deinen Freunden statt.',[
+ [1,17,'Ein Samstag mit zwei Plänen',()=> (state.phone==='borrow'?'Das Leihhandy ist zurückgegeben. Für die Turnierinfos hast du mit dem Team einen Treffpunkt abgemacht. ':state.phone==='repair'?'Der reparierte Akku hält. Die Treffpunktänderung im Teamchat hast du gesehen. ':'Die Treffpunktänderung poppt auf deinem neuen Handy auf. ')+'Dann schreibt dir der Laden. 180 CHF für eine Schicht. Sie fällt genau auf das Turnier.',[
  ['Den Job übernehmen',180,'Du verdienst 180 CHF, verpasst aber das Turnier.'],
  ['Beim Turnier mitspielen',0,'Du erlebst einen besonderen Tag mit deinem Team.']]],
  [2,21,'Die erste eigene Wohnung','Du kannst ein Jahr lang in einer WG wohnen oder dir ein Studio leisten. Nach den übrigen Kosten bleiben dir 4’800 CHF fürs Wohnen.',[
@@ -260,7 +270,7 @@ function crisisReaction(index){
 }
 const sceneImages={
  8:['🧸','🪙','Spielzeug und Münzen am Flohmarkt'],
- 15:['📱','🪙','Handy und Geld aus dem Ferienjob'],
+
  17:['🏆','🛍️','Pokal und Einkaufstasche für Turnier und Ladenjob'],
  19:['🎓','💼','Abschluss und Arbeitstasche'],
  21:['🔑','🏠','Schlüssel für die erste eigene Wohnung'],
@@ -280,6 +290,27 @@ const sceneImages={
  86:['📖','💛','Lebensbuch und ein Geschenk an die nächste Generation']
 };
 function illustrate(reaction){
+ if(chapters[step]?.scene[0]===15){
+  el('art').innerHTML=`<svg viewBox="0 0 640 260" role="img" aria-label="Handy mit fast leerem Akku und zwei Nachrichten aus dem Teamchat">
+   <rect width="640" height="260" fill="#26254b"/>
+   <circle cx="105" cy="200" r="104" fill="#564681"/>
+   <circle cx="563" cy="61" r="83" fill="#395a62"/>
+   <rect x="153" y="17" width="334" height="226" rx="30" fill="#10111c" stroke="#8986ad" stroke-width="3"/>
+   <text x="179" y="54" fill="#f7f4ff" font-size="20" font-weight="700">TEAMCHAT</text>
+   <text x="438" y="54" fill="#ffac9c" text-anchor="end" font-size="20">3 %</text>
+   <g class="notification">
+    <rect x="176" y="73" width="285" height="58" rx="13" fill="#3a3861"/>
+    <text x="190" y="109" fill="#fff" font-size="20">Mia · Bist du am Samstag dabei?</text>
+   </g>
+   <g class="notification">
+    <rect x="176" y="143" width="285" height="58" rx="13" fill="#dcff90"/>
+    <text x="190" y="179" fill="#151b0a" font-size="20">Team · Anmeldung bis 20 Uhr</text>
+   </g>
+   <path d="M288 222h64" stroke="#8986ad" stroke-width="5" stroke-linecap="round"/>
+  </svg><figcaption>Das Team wartet auf deine Antwort.</figcaption>`;
+  return;
+ }
+
  const [sky,horizon,symbol,description,initial]=art[phaseNow()];
  const [age,title]=chapters[step]?.scene??[];
  const image=title==='Zwei Briefe, zwei Wege'?['✉️','🎓','Lehrvertrag und Zusage fürs Gymnasium']:
@@ -305,9 +336,48 @@ function illustrate(reaction){
  </g></svg><figcaption></figcaption>`;
  el('art').querySelector('figcaption').textContent=thought?'Niki · '+mood+' — «'+thought+'»':'Niki · '+mood;
 }
+const phonePlans=[
+ {id:'repair',label:'Akku ersetzen',cost:120,note:'Du behältst dein Handy. Der Laden hat den Akku bis Samstag ausgetauscht.'},
+ {id:'buy',label:'Gebrauchtes Handy kaufen',cost:650,note:'Du hast sofort ein funktionierendes Handy und weniger Geld für später.'},
+ {id:'borrow',label:'Handy ausleihen',cost:0,note:'Du sparst das Geld. Am Freitag musst du das Handy zurückgeben und den Treffpunkt vorher abmachen.'}
+];
+function phoneMission(commit){
+ const mission=el('mission');
+ mission.innerHTML='<fieldset class="mission"><legend>Teste deinen Plan</legend><div></div><progress aria-label="Geld nach der Auswahl"></progress><output aria-live="polite"></output></fieldset>';
+ const list=mission.querySelector('fieldset div');
+ const bar=mission.querySelector('progress');
+ const preview=mission.querySelector('output');
+ const confirm=button('Plan festlegen',()=>commit(selected.label,()=>{
+  spend(selected.cost);
+  state.phone=selected.id;
+  return selected.note;
+ }),true);
+ confirm.disabled=true;
+ let selected;
+ bar.max=state.cash;
+ bar.value=state.cash;
+ preview.textContent='Verfügbar · '+chf(state.cash);
+ for(const plan of phonePlans){
+  const label=document.createElement('label');
+  const radio=document.createElement('input');
+  radio.type='radio';
+  radio.name='phone-plan';
+  radio.onchange=()=>{
+   selected=plan;
+   bar.value=state.cash-plan.cost;
+   preview.textContent='Übrig · '+chf(bar.value)+' · '+plan.note;
+   preview.classList.remove('budget-change');
+   void preview.offsetWidth;
+   preview.classList.add('budget-change');
+   confirm.disabled=false;
+  };
+  label.append(radio,plan.label+' · '+chf(plan.cost));
+  list.append(label);
+ }
+}
 function render(){
  prepareHelp();illustrate();
- el('choices').replaceChildren();el('result').textContent='';
+ el('choices').replaceChildren();el('mission').replaceChildren();el('result').textContent='';
  if(step===chapters.length){
   const n=worth();
   el('chapter').textContent='LETZTES KAPITEL · 90 JAHRE';
@@ -325,16 +395,16 @@ function render(){
   el('chapter').textContent='KAPITEL '+(step+1)+' / '+chapters.length+' · '+age+' JAHRE';
   el('title').textContent=title;el('story').textContent=typeof story==='function'?story():story;
   const available=typeof options==='function'?options():options;
-  for(const [index,[label,action]] of available.entries()){
-   button(label,()=>{
+  const commit=(label,action,index)=>{
     const before=worth(), explanation=action(), delta=worth()-before;
     const impact=delta===0?'Vermögen in diesem Zug unverändert.':'Vermögen in diesem Zug '+(delta>0?'+':'−')+chf(Math.abs(delta))+'.';
-    illustrate(mini?[delta<0?'Nachdenklich':'Zuversichtlich',delta<0?'Das war mir etwas wert.':'Mal sehen, was daraus wird.',delta<0?0:1]:phase===4?crisisReaction(index):reactions[phase][index]);
+    if(age!==15)illustrate(mini?[delta<0?'Nachdenklich':'Zuversichtlich',delta<0?'Das war mir etwas wert.':'Mal sehen, was daraus wird.',delta<0?0:1]:phase===4?crisisReaction(index):reactions[phase][index]);
     el('result').textContent=explanation+' '+impact;
     const li=document.createElement('li');li.textContent=age+' Jahre · '+label+' — '+explanation;el('log').append(li);
-    totals();el('choices').replaceChildren();button('Weiter →',()=>{step++;render()},true).focus();
-   });
-  }
+    totals();el('mission').replaceChildren();el('choices').replaceChildren();button('Weiter →',()=>{step++;render()},true).focus();
+  };
+  if(age===15)phoneMission(commit);
+  else for(const [index,[label,action]] of available.entries())button(label,()=>commit(label,action,index));
  }
  totals();el('title').focus();
 }
