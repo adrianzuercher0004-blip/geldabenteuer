@@ -1,450 +1,191 @@
-<!doctype html><html lang="de-CH"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lebensquest</title><style>
-*{box-sizing:border-box}body{margin:0;background:#10111c;color:#f7f4ff;font:1rem/1.55 system-ui,sans-serif}main{max-width:890px;margin:auto;padding:24px clamp(14px,4vw,36px)}header{position:relative;overflow:hidden;border-radius:28px;padding:clamp(24px,6vw,52px);background:radial-gradient(ellipse at 90% 0%,#743ba1,transparent 65%),linear-gradient(130deg,#282049,#17192f)}.kicker{letter-spacing:.15em;color:#d9fc88;font-size:.8rem;font-weight:850}h1{font-size:clamp(2.7rem,8vw,5.2rem);line-height:.98;letter-spacing:-.06em;margin:12px 0}header p{max-width:500px;margin-bottom:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.stats div{background:#22243a;padding:10px;border-radius:14px;font-size:.83rem}.stats strong{display:block;color:#dcff90;font-size:clamp(.94rem,3vw,1.5rem)}section{background:#202238;border:1px solid #3a3c55;border-radius:22px;padding:clamp(16px,4vw,30px)}h2{margin:6px 0;font-size:clamp(1.5rem,5vw,2.3rem);line-height:1.12}p{margin:12px 0}.choices{display:grid;gap:9px;margin-top:20px}button{font:inherit;text-align:left;color:inherit;background:#30324c;border:1px solid #50536e;border-radius:13px;padding:12px 15px;cursor:pointer;min-height:44px}button:not(:disabled):hover{border-color:#dcff90}button:focus-visible{outline:3px solid #dcff90;outline-offset:3px}button:disabled{opacity:.65;cursor:default}button strong,button small{display:block}small,summary{color:#d3cfe3}.next{background:#dcff90;color:#151b0a;font-weight:800;border-color:transparent}.receipt{border-left:4px solid #dcff90;padding-left:14px}.track{height:6px;width:100%;accent-color:#dcff90}details{margin-top:16px}summary{cursor:pointer}li{margin:8px 0}.footer{color:#d3cfe3;font-size:.82rem}
-
-.help{margin-top:16px;padding:0 14px 14px;background:#282944;border-radius:14px}.help summary{padding-top:12px;font-weight:750}.lesson{border-top:1px solid #50536e;margin-top:12px;padding-top:12px}.lesson h3{margin:0}.lesson label{display:block}.lesson input{width:100%;accent-color:#dcff90}.lesson meter{display:block;width:100%;height:16px;accent-color:#dcff90}.lesson output{font-weight:750}.lesson button{margin-top:8px}.lesson .caption{min-height:3em}
-
-.scene-art{margin:0 0 18px;border-radius:16px;overflow:hidden;background:#151629}.scene-art svg{display:block;width:100%;height:auto}.scene-art figcaption{padding:9px 13px;color:#e6def8;font-size:.9rem}.scene-art .face{transition:fill .25s}.scene-art text{font-family:system-ui,sans-serif}
-
-.mission{margin:16px 0;padding:16px;background:#181a30;border:1px solid #50536e;border-radius:16px}
-.mission legend{padding:0 7px;font-weight:800;color:#dcff90}
-.mission label{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer}
-.mission input,.mission progress{accent-color:#dcff90}
-.mission progress{display:block;width:100%;margin:12px 0}
-.mission output{display:block}
-.notification{animation:arrive .45s ease-out both}
-.notification + .notification{animation-delay:.22s}
-.budget-change{animation:arrive .25s ease-out}
-@keyframes arrive{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.notification,.budget-change{animation:none}}
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lebensquest · Abfahrt Samstag</title>
+<style>
+*{box-sizing:border-box}
+:root{color-scheme:dark;--bg:#101525;--panel:#1e2943;--mint:#bdf584;--ink:#f6f5fa;--muted:#c3cae1}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.5 system-ui,sans-serif}
+main{max-width:830px;margin:auto;padding:18px}
+h1,h2,p{margin:0 0 .55rem}h1{font-size:clamp(2rem,8vw,4rem);line-height:1;letter-spacing:-.05em}
+.kicker{color:var(--mint);font-weight:800;letter-spacing:.14em;font-size:.75rem}
+.status,.actions,.section-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.status{margin:14px 0}.status span{background:var(--panel);border-radius:9px;padding:6px 11px}
+.board{position:relative;aspect-ratio:720/380;background:#334a58;border-radius:18px;overflow:hidden;isolation:isolate}
+.board svg{display:block;width:100%;height:100%}
+.pin{position:absolute;transform:translate(-50%,-50%);box-shadow:0 3px 0 #0a1024;white-space:nowrap}
+.pin[aria-pressed=true]{background:var(--mint);color:#14240d}
+#station{left:22%;top:44%}#shop{left:50%;top:71%}#field{left:79%;top:35%}
+button{min-height:44px;border:1px solid #68769a;border-radius:10px;background:#303e62;color:var(--ink);padding:8px 12px;font:inherit;font-weight:650;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--mint)}button:disabled{opacity:.5;cursor:default}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.primary{background:var(--mint);color:#14240d;border-color:transparent}
+.card{background:var(--panel);border-radius:15px;margin-top:12px;padding:14px}
+.section-head{justify-content:space-between}.section-head h2{margin:0}
+#info{border-radius:50%;min-width:44px}
+#feedback{min-height:1.5em;color:var(--mint);margin-top:10px}
+#plan{color:var(--muted);margin-bottom:10px}
+dialog{background:var(--panel);color:var(--ink);border:1px solid #68769a;border-radius:16px;width:min(92%,440px);padding:20px}
+dialog::backdrop{background:#06091bc9}
+@keyframes appear{from{opacity:.3;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.arrive{animation:appear .32s ease-out}
+#arrival:not([hidden]){animation:appear .5s ease-out}
+@media(prefers-reduced-motion:reduce){.arrive,#arrival:not([hidden]){animation:none}}
+#arrival:not([hidden]){animation:appear .5s ease-out}
+@media(max-width:460px){main{padding:12px}.pin{font-size:.8rem;padding:4px 7px}}
 </style>
-<main><header><div class="kicker">LEBENSQUEST / CHF</div><h1>Ein Leben.<br>Deine Züge.</h1><p>Von der Geburt bis zum letzten Kapitel. Was bleibt von deinen Entscheidungen?</p></header>
-<div class="stats"><div>Alter<strong id="age"></strong></div><div>Vermögen¹<strong id="worth"></strong></div><div>Schulden<strong id="debt"></strong></div></div>
-<progress class="track" id="progress" max="8" value="0" aria-label="Lebensverlauf"></progress>
-<section><figure class="scene-art" id="art"></figure><div class="kicker" id="chapter"></div><h2 id="title" tabindex="-1"></h2><p id="story"></p><div id="mission"></div><div id="result" class="receipt" aria-live="polite"></div><details class="help" id="help" hidden><summary>💡 Entscheidungshilfe öffnen</summary><p id="hint"></p>
-<div class="lesson" id="lesson" hidden>
-<h3>Mini-Erklärfilm · Zinsen auf Zinsen</h3>
-<p>Du startest mit 1’000 CHF. Im Beispiel kommen jedes Jahr 5 % dazu. Du zahlst kein zusätzliches Geld ein.</p>
-<label for="year">Zeitleiste · <output id="year-label"></output></label>
-<input id="year" type="range" min="0" max="20" value="0">
-<label for="compound">Zinsen bleiben angelegt · <output id="compound-label"></output></label>
-<meter id="compound" min="0" max="2700" value="1000"></meter>
-<label for="simple">Zinsen werden beiseitegelegt · <output id="simple-label"></output></label>
-<meter id="simple" min="0" max="2700" value="1000"></meter>
-<p class="caption" id="caption"></p>
-<button type="button" class="next" id="play">▶ Abspielen</button>
-<button type="button" id="replay">↺ Von vorn</button>
-<p><small>Beide Balken zeigen den Gesamtbetrag inklusive der Zinsen. Die 5 % sind eine Rechenannahme. Die Rendite einer Anlage kann schwanken und auch negativ sein.</small></p>
-</div></details><div class="choices" id="choices"></div><details id="journal"><summary>Dein Lebensbuch</summary><ol id="log"></ol></details></section>
-<p class="footer">¹ Bargeld + Anlagen − Schulden. Fiktive Beträge und vereinfachte Lebensphasen. Anlagen können an Wert verlieren. Konkurs ist hier ein vereinfachtes Spielende.</p></main>
+</head>
+<body><main>
+<p class="kicker">LEBENSQUEST · MISSION 01</p>
+<h1>Abfahrt Samstag</h1>
+<p>Schaff es ans Turnier. Bonus, wenn dir danach noch mindestens 30 CHF bleiben.</p>
+<div class="status" aria-label="Spielstand"><span id="day"></span><span id="cash"></span></div>
+<div class="board" aria-label="Stadtkarte">
+<svg viewBox="0 0 720 380" aria-hidden="true">
+ <defs><pattern id="grass" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="8" cy="8" r="2" fill="#779468" opacity=".42"/></pattern></defs>
+ <path fill="#405e58" d="M0 0h720v380H0z"/><path fill="url(#grass)" d="M0 0h720v380H0z"/>
+ <path d="M-25 290Q144 237 236 263T471 225Q584 182 745 245" fill="none" stroke="#232e47" stroke-width="58"/>
+ <path d="M-25 290Q144 237 236 263T471 225Q584 182 745 245" fill="none" stroke="#a8a6a3" stroke-width="3" stroke-dasharray="12 14"/>
+ <path d="M-20 89 260 89" stroke="#202939" stroke-width="38"/><path d="M-20 78H260M-20 100H260" stroke="#bac4c7" stroke-width="4"/>
+ <rect x="56" y="61" width="174" height="54" rx="13" fill="#e0a359"/><rect x="79" y="73" width="97" height="19" rx="5" fill="#273b57"/><circle cx="204" cy="89" r="8" fill="#fff0bd"/>
+ <path d="M275 286h160v62H275z" fill="#bc6765"/><path d="M259 288l26-31h141l26 31z" fill="#edb077"/><path d="M301 307h35v23h-35zM360 306h38v42h-38z" fill="#2c3f5c"/>
+ <rect x="471" y="45" width="195" height="121" rx="13" fill="#7fa66a" stroke="#dbe3ba" stroke-width="3"/>
+ <path d="M569 45v121M471 76h26v60h-26m195-60h-26v60h26" stroke="#dbe3ba" fill="none" stroke-width="3"/><circle cx="569" cy="106" r="22" fill="none" stroke="#dbe3ba" stroke-width="3"/>
+ <g fill="#253f40"><circle cx="30" cy="210" r="17"/><circle cx="265" cy="151" r="22"/><circle cx="294" cy="174" r="16"/><circle cx="688" cy="178" r="23"/><circle cx="642" cy="326" r="25"/><circle cx="103" cy="333" r="25"/></g>
+ <g id="arrival" hidden><circle cx="594" cy="86" r="19" fill="#bdf584"/><path d="m586 86 6 6 11-14" fill="none" stroke="#14240d" stroke-width="4" stroke-linecap="round"/></g>
+</svg>
+<button class="pin" id="station" aria-controls="location" aria-pressed="false">Bahnhof</button>
+<button class="pin" id="shop" aria-controls="location" aria-pressed="false">Laden</button>
+<button class="pin" id="field" aria-controls="location" aria-pressed="false">Sportplatz</button>
+</div>
+<section class="card" id="location" aria-labelledby="place">
+<div class="section-head"><h2 id="place">Wohin zuerst?</h2><button id="info" aria-label="Erklärung zum gewählten Ort" hidden>?</button></div>
+<p id="description">Tippe auf einen Ort und finde heraus, was du dort tun kannst.</p>
+<div class="actions" id="actions"></div>
+</section>
+<section class="card" aria-labelledby="plan-title">
+<h2 id="plan-title">Dein Plan</h2><p id="plan"></p>
+<div class="actions"><button class="primary" id="next">Nächster Tag →</button><button id="hint">Tipp anzeigen</button><button id="reset" hidden>Nochmal spielen</button></div>
+<p id="feedback" role="status"></p>
+</section>
+<dialog id="help" aria-labelledby="help-title"><h2 id="help-title"></h2><p id="help-text"></p><form method="dialog"><button class="primary">Zurück zur Karte</button></form></dialog>
+</main>
 <script>
 const el=id=>document.getElementById(id);
-const chf=n=>new Intl.NumberFormat('de-CH').format(n)+' CHF';
-let state,step,previousRun;
-const worth=()=>state.cash+state.invest-state.debt;
-function spend(n){
- const paid=Math.min(state.cash,n);
- state.cash-=paid;
- state.debt+=n-paid;
- return n-paid;
-}
-function earn(n){state.cash+=n}
-const scenes=[
- [0,'Hallo, Niki','Du kommst zur Welt. Deine Familie eröffnet ein Sparkonto und legt 500 CHF für deinen 15. Geburtstag zurück.',[
- ['Bis zum Flohmarkt mit 8 vorspulen',()=> 'Mit 8 entscheidest du zum ersten Mal selbst über dein Geld.']]],
- [15,'Akku 3 %. Teamchat offen.','Heute Abend schliesst die Anmeldung fürs Turnier. Dein Handy geht ständig aus. Bis zum Wochenende brauchst du eine Lösung. Plane zuerst mit deinem Budget.',[],()=>earn(800)],
- [19,'Nach der Ausbildung',()=>state.apprentice?'Du hast deine Lehre abgeschlossen. Dein Betrieb bietet dir einen Einstiegsjob an. Oder du machst berufsbegleitend die Berufsmaturität.':'Nach der Matura hast du einen Studienplatz. Daneben liegt ein Angebot für ein bezahltes Praktikum.',()=>[
-  [state.apprentice?'Berufsmaturität beginnen':'Studium beginnen',()=>{state.training=true;spend(600);return 'Du investierst 600 CHF in deinen nächsten Ausbildungsschritt. Im Spiel erhöht dieser Abschluss später deine Sparmöglichkeiten.'}],
-  [state.apprentice?'Im Lehrbetrieb einsteigen':'Das Praktikum antreten',()=>{earn(1000);return 'Du sammelst Berufserfahrung und legst 1’000 CHF zurück.'}]
- ]],
- [30,'Der erste grosse Plan',()=> 'Nach Lohn und Lebenshaltungskosten konntest du bis heute '+chf(state.training?36000:20000)+' zurücklegen. Jetzt steht eine Entscheidung an.',[
- ['Breit gestreut anlegen · bis zu 15’000 CHF',()=>{const amount=Math.min(state.cash,15000);state.cash-=amount;state.invest=amount;return 'Du hast '+chf(amount)+' investiert. Bei einem Kursrückgang kann der Wert sinken, während dein übriges Geld verfügbar bleibt.'}],
- ['30’000 CHF für ein Café auf Kredit aufnehmen',()=>{state.debt+=30000;state.cafe=true;return 'Du eröffnest dein eigenes Café. Die 30’000 CHF stecken im Betrieb und erscheinen im Spiel erst beim Verkauf wieder als Vermögen.'}],
- ['Liquid bleiben · Geld auf dem Konto behalten',()=> 'Dein Geld ist für unerwartete Ausgaben verfügbar. Im Spiel bringt es auf dem Konto keinen Zins.']],
- ()=>earn(state.training?36000:20000)],
- [42,'Das Jahr, in dem alles kippt',()=>state.cafe?'Vor deinem Café wird monatelang gebaut. Der Umsatz bricht ein. Für den Weiterbetrieb brauchst du 18’000 CHF.':state.invest?'Deine Anlagen verlieren 30 % an Wert. Gleichzeitig steht eine unerwartete Rechnung über 12’000 CHF an.':'Eine unerwartete Rechnung über 12’000 CHF kommt genau in dem Monat, in dem dein Einkommen wegfällt.',()=>state.cafe?[
- ['Café offen halten · 18’000 CHF zahlen',()=>{const loan=spend(18000);state.keptCafe=true;return 'Du hältst den Betrieb am Leben.'+(loan?' Dafür kommen '+chf(loan)+' Schulden hinzu.':' Du finanzierst den Engpass aus deinem Guthaben.')+' Ob sich das auszahlt, zeigt sich später.'}],
- ['Café verkaufen · 12’000 CHF Erlös',()=>{earn(12000);repay();return 'Der Verkaufserlös hilft beim Tilgen. Der Betrieb ist verkauft und künftige Gewinne fallen weg.'}]
- ]:[
- ['Rechnung aus verfügbaren Mitteln zahlen',()=>{const loan=spend(12000);return loan?'Du musst '+chf(loan)+' leihen. Eine grössere Geldreserve hätte diesen Betrag gesenkt.':'Dein Guthaben fängt den Schock ab. Deine Anlagen musst du dafür nicht anfassen.'}],
- ...(state.invest?[['Anlagen zum tiefen Kurs verkaufen',()=>{earn(state.invest);state.invest=0;spend(12000);return 'Der Kursverlust ist jetzt endgültig. Der Verkauf hilft, die Rechnung zu bezahlen. An einer späteren Erholung nimmst du nicht mehr teil.'}]]:[]),
- ['Rechnung auf Raten · 14’000 CHF insgesamt',()=>{state.debt+=14000;return 'Du behältst heute dein Bargeld. Die Raten kosten dich insgesamt 2’000 CHF mehr.'}]
- ],()=>{if(state.invest)state.invest=Math.round(state.invest*.7)}],
- [53,'Eine zweite Chance',()=> (state.keptCafe?'Dein Café erholt sich. Beim Verkauf erhältst du 125’000 CHF. ':'')+'Seit der Krise hast du '+chf(state.training?160000:100000)+' zurückgelegt. Wie nutzt du die nächsten 15 Jahre?',[
- ['Schulden tilgen und langfristig anlegen',()=>{repay();const amount=Math.floor(state.cash*.75);state.cash-=amount;state.invest+=amount;state.strategy='steady';return 'Du investierst '+chf(amount)+' und behältst '+chf(state.cash)+' verfügbar. Der Ausgang hängt davon ab, wie sich die Anlagen entwickeln.'}],
- ['Eine Firma mit einem Kredit von 550’000 CHF aufbauen',()=>{state.debt+=550000;state.strategy='firm';return 'Die Firma kann viel wert werden. Scheitert sie, bleibt der Kredit bei dir. Dein bisheriger Weg beeinflusst, wie viele Aufträge du gewinnen kannst.'}],
- ['Schulden tilgen und Geld verfügbar halten',()=>{repay();state.strategy='cash';return 'Du kannst auf dein Guthaben zugreifen. Der Betrag wächst in dieser Phase nur durch das, was du zusätzlich zurücklegst.'}]
- ],()=>{earn(state.training?160000:100000);if(state.keptCafe)earn(125000)}],
- [68,'Die Rechnung geht auf?',()=>state.retirement+' Wie planst du die nächsten Jahre?',[
- ['Einfacher leben · 45’000 CHF ausgeben',()=>{spend(45000);return 'Du planst mit tieferen Ausgaben und behältst mehr Spielraum.'}],
- ['Mehr reisen und geniessen · 110’000 CHF ausgeben',()=>{spend(110000);return 'Du erfüllst dir Reisewünsche. Für spätere Ausgaben bleibt entsprechend weniger übrig.'}]
- ],()=>{
-  earn(state.training?210000:150000);
-  if(state.strategy==='firm'){
-   const success=state.training||state.keptCafe||(state.network&&state.contacts);
-   earn(success?1650000:100000);
-   repay();
-   state.retirement=success?'Deine Firma gewinnt grosse Aufträge. Beim Verkauf bringt sie 1’650’000 CHF. Der Kredit wird aus deinen Mitteln getilgt.':'Die Grossaufträge bleiben aus. Für die Firma bekommst du nur 100’000 CHF. Du verwendest dein Guthaben zur Tilgung, aber ein Teil der Schulden bleibt offen.';
-  }else{
-   state.invest=Math.round(state.invest*1.6);
-   state.retirement=state.invest?'In dieser Spielrunde haben sich deine Anlagen bis zum Ruhestand erholt und sind um 60 % gewachsen.':'Du erreichst den Ruhestand mit deinem verfügbaren Guthaben.';
-  }
- }],
- [82,'Was dir wichtig ist','In deinen letzten Jahren brauchst du Unterstützung. Du kannst eine einfachere Lösung wählen oder länger mit zusätzlicher Hilfe zu Hause bleiben.',()=>[
- ['Unterstützung organisieren · 35’000 CHF',()=>{spend(35000);return 'Du organisierst Unterstützung und hältst deine Ausgaben tiefer.'}],
- [state.smaller?'Länger zu Hause bleiben · 75’000 CHF':'Länger zu Hause bleiben · 85’000 CHF',()=>{spend(state.smaller?75000:85000);return 'Du finanzierst mehr Hilfe und kannst länger in deiner vertrauten Umgebung wohnen.'}]
- ]]
-];
-// Short chapters share the illustration of the corresponding life phase.
-const extra=[
- [0,8,'Der Flohmarkt','Du bekommst 40 CHF. Auf dem Flohmarkt kannst du Spielzeug kaufen oder mit einem kleinen Stand selbst etwas verkaufen.',[
- ['Spielzeug kaufen',-30,'Das Spielzeug macht dir Freude. Vom Geschenk bleiben 10 CHF.'],
- ['Einen Stand ausprobieren',35,'Du verkaufst alte Spielsachen. Nach den Standkosten bleiben dir 35 CHF zusätzlich.'],
- ['Das Geld sparen',0,'Die 40 CHF bleiben für später verfügbar.']],40],
- [1,16,'Der erste Dauerauftrag','Ein Musikabo kostet 12 CHF im Monat. Du entscheidest für ein Jahr.',[
- ['Abo abschliessen',-144,'Einzeln wirken 12 CHF klein. In zwölf Monaten werden daraus 144 CHF.'],
- ['Gratisversion nutzen',0,'Du hörst Musik mit Werbung und behältst 144 CHF.']]],
- [1,16,'Zwei Briefe, zwei Wege','Dein Schnupperbetrieb bietet dir eine Lehrstelle an. Gleichzeitig hast du einen Platz am Gymnasium. Welcher Weg passt zu dem, was du lernen möchtest?',[
- ['Lehrstelle annehmen',800,'Du lernst im Betrieb und legst im Spiel 800 CHF vom Lehrlingslohn zurück.','apprentice'],
- ['Ans Gymnasium gehen',0,'Du arbeitest auf die Matura hin und hältst dir den Weg zum Studium offen.']]],
- [1,17,'Ein Samstag mit zwei Plänen',()=> (state.phone==='borrow'?'Das Leihhandy ist zurückgegeben. Für die Turnierinfos hast du mit dem Team einen Treffpunkt abgemacht. ':state.phone==='repair'?'Der reparierte Akku hält. Die Treffpunktänderung im Teamchat hast du gesehen. ':'Die Treffpunktänderung poppt auf deinem neuen Handy auf. ')+'Dann schreibt dir der Laden. 180 CHF für eine Schicht. Sie fällt genau auf das Turnier.',[
- ['Den Job übernehmen',180,'Du verdienst 180 CHF, verpasst aber das Turnier.'],
- ['Beim Turnier mitspielen',0,'Du erlebst einen besonderen Tag mit deinem Team.']]],
- [2,21,'Die erste eigene Wohnung','Du kannst ein Jahr lang in einer WG wohnen oder dir ein Studio leisten. Nach den übrigen Kosten bleiben dir 4’800 CHF fürs Wohnen.',[
- ['In eine WG ziehen',-3000,'Du teilst Bad und Küche. Nach deinem Mietanteil bleiben 1’800 CHF.'],
- ['Ein Studio mieten',-4800,'Du hast mehr Ruhe. Das Wohnbudget ist damit aufgebraucht.']],4800],
- [2,24,'Ein Pendel-Dilemma','Dein neues Team arbeitet ausserhalb der Stadt. Für dieses Jahr hast du 3’000 CHF für den Arbeitsweg übrig.',[
- ['ÖV und Velo kombinieren',-1200,'Du sparst 1’800 CHF. Der Weg braucht mehr Zeit.'],
- ['Ein günstiges Auto nutzen',-3000,'Du bist flexibler, verbrauchst aber das gesamte Pendelbudget.']],3000],
- [2,26,'Kursplatz bis Freitag','Eine Weiterbildung könnte dir den Wechsel ins Projektteam ermöglichen. Zwei Kursabende fallen auf deine Schichten. Der Kurs kostet 1’200 CHF.',[
- ['Mit dem Betrieb verhandeln',-600,'Dein Betrieb übernimmt die Hälfte. Dafür tauscht du zwei Schichten. Im Projektteam kannst du im Spiel später mehr zurücklegen.','training'],
- ['Selbst bezahlen',-1200,'Du bezahlst den ganzen Kurs und tauschst deine Schichten. Der Abschluss öffnet dir im Spiel den Weg ins Projektteam.','training'],
- ['Die nächste Ausschreibung abwarten',0,'Du behältst Geld und freie Abende und bleibst vorerst in deiner Rolle.']]],
- [2,27,'Eine Rechnung, zwei Wege','Eine kaputte Waschmaschine muss ersetzt werden. Du kannst eine geprüfte gebrauchte nehmen oder eine neue mit längerer Garantie.',[
- ['Gebraucht kaufen',-300,'Du sparst 450 CHF. Die Garantie ist kürzer.'],
- ['Neu kaufen',-750,'Die längere Garantie gibt dir Sicherheit, kostet aber mehr.']]],
- [2,29,'Platz für Zukunftspläne','Du überlegst, wie du in den nächsten Jahren leben möchtest. Ob du Kinder möchtest, entscheidest du selbst. Was planst du in dieser Runde?',[
- ['Ein Kind einplanen',0,'Du rechnest damit, dass Betreuung und Arbeit bald aufeinander abgestimmt werden müssen.','family'],
- ['Später entscheiden',0,'Du hältst dir die Entscheidung offen und planst vorerst mit deinem heutigen Alltag.','undecided'],
- ['Kinderfrei leben',0,'Du planst deine Zeit und dein Geld für andere Ziele.']]],
- [3,31,'Wer hat am Donnerstag Zeit?',()=>state.family?'Ein Kind gehört jetzt zu deinem Alltag. Die Kita hat am Donnerstag keinen Platz. Dein Betrieb braucht bis morgen einen neuen Wochenplan.':state.undecided?'Dein Betrieb bietet dir einen freien Tag pro Woche bei kleinerem Pensum. Möchtest du dir Zeit für deine nächsten Schritte freihalten?':'Dein Betrieb bietet dir einen freien Tag pro Woche bei kleinerem Pensum. Möchtest du ihn für ein eigenes Projekt nutzen?',()=>state.family?[
- ['Betreuung teilen · 2’400 CHF',-2400,'Du teilst den Donnerstag mit einer vertrauten Person und bezahlst für weitere Betreuungstage. Dein Pensum bleibt gleich.'],
- ['Pensum senken · 4’800 CHF weniger Einkommen',-4800,'Du übernimmst den Donnerstag. In diesem Spieljahr bleiben dir 4’800 CHF weniger.','freeDay'],
- ['Zusätzliche Betreuung buchen · 3’600 CHF',-3600,'Du organisierst Betreuung am Donnerstag und behältst dein Pensum.']
- ]:[
- ['Pensum senken · 4’800 CHF weniger Einkommen',-4800,'Du gewinnst einen freien Tag pro Woche für deine Pläne.','freeDay'],
- ['Pensum behalten',0,'Du behältst dein Einkommen und planst deine Vorhaben rund um die Arbeit.']
- ],4800],
- [3,33,'Ein Brief von der Bank','In den letzten drei Jahren sind 6’000 CHF zusätzlich übrig geblieben. Was machst du damit?',[
- ['Eine Notreserve trennen',0,'Du legst 6’000 CHF im Kopf für die Krise zurück. Bei der nächsten Überraschung erinnert dich das Spiel daran.','buffer'],
- ['Eine Reise machen',-4200,'Du gönnst dir eine Auszeit. 1’800 CHF bleiben von diesem Überschuss.'],
- ['Mehr investieren',0,'Du verschiebst 6’000 CHF vom Konto in Anlagen. Das Geld kann an Wert gewinnen oder verlieren.','invest']],6000],
- [3,37,'Ein Angebot am Abend',()=> 'Eine Bekannte bietet dir 2’800 CHF für ein Nebenprojekt. Es beansprucht viele Abende.'+(state.family?' Wer übernimmt dann die Betreuung?':state.freeDay?' Du hast dir bewusst mehr Zeit freigehalten. Ist der Auftrag es wert?':''),[
- ['Den Auftrag annehmen',2800,'Du verdienst 2’800 CHF und lernst, einen Auftrag zu planen. Diese Erfahrung hilft später beim Aufbau einer Firma.','network'],
- ['Die Abende freihalten',0,'Du behältst Zeit für Erholung und Freunde.']]],
- [4,44,'Nach dem Schock','Du erhältst 4’000 CHF aus einem Zusatzauftrag. Jetzt entscheidest du, wie du sie einsetzt.',[
- ['Bis zu 4’000 CHF Schulden tilgen',0,'Du senkst deine Schulden, soweit welche offen sind.','repay'],
- ['Geld verfügbar halten',0,'Du behältst einen Puffer für die nächsten Monate.']],4000],
- [4,48,'Ein neuer Kontakt','Ein Branchentreffen kostet 350 CHF. Du könntest dort Menschen kennenlernen, mit denen du später arbeitest.',[
- ['Zum Treffen gehen',-350,'Du knüpfst Kontakte. Das hilft deiner späteren Firma zusammen mit Erfahrung aus einem Nebenprojekt.','contacts'],
- ['Den Abend anders nutzen',0,'Du sparst die Teilnahmegebühr.']]],
- [5,56,'Geld für eine Herzenssache','Du hast dieses Jahr zusätzlich 8’000 CHF gespart. Ein Jugendtreff in deiner Nähe braucht Unterstützung.',[
- ['2’000 CHF beitragen',-2000,'Der Jugendtreff kann neue Aktivitäten anbieten. 6’000 CHF bleiben von deinem Überschuss.'],
- ['Den ganzen Betrag behalten',0,'Du stärkst dein eigenes Polster.']],8000],
- [5,61,'Wie viel ist dir Zeit wert?','Du könntest zwei Jahre lang ein zusätzliches Projekt übernehmen oder jede Woche einen Tag freihalten.',[
- ['Das Projekt übernehmen',18000,'Das Projekt erhöht dein Guthaben um 18’000 CHF. Deine Wochen sind voller.'],
- ['Einen Tag freihalten',0,'Du hast mehr Zeit für Dinge, die dir ausserhalb der Arbeit wichtig sind.']]],
- [6,72,'Ein Wunsch aus der Familie','Eine Person aus deiner Familie will eine Ausbildung machen und bittet dich um 12’000 CHF Unterstützung.',[
- ['12’000 CHF beisteuern',-12000,'Du ermöglichst einen leichteren Start. Deine eigenen Reserven sinken.'],
- ['2’000 CHF beisteuern',-2000,'Du hilfst mit einem kleineren Betrag und behältst mehr Spielraum.'],
- ['Bei der Planung helfen',0,'Du hilfst beim Aufstellen eines Budgets und suchst gemeinsam nach Finanzierungsmöglichkeiten.']]],
- [6,77,'Die Wohnung verändert sich','Im Alltag werden Treppen mühsamer. Du kannst die Wohnung umbauen oder früher in eine kleinere Wohnung ziehen.',[
- ['Wohnung umbauen',-24000,'Du bleibst im vertrauten Zuhause. Der Umbau kostet 24’000 CHF.'],
- ['Kleiner wohnen',-8000,'Der Umzug kostet 8’000 CHF. Spätere Hilfe zu Hause wird dadurch im Spiel 10’000 CHF günstiger.','smaller']]],
- [7,86,'Was du weitergibst','Du schreibst auf, was du im Leben über Geld gelernt hast. Möchtest du ausserdem einem Projekt Geld hinterlassen?',[
- ['5’000 CHF für ein Jugendprojekt vorsehen',-5000,'Du unterstützt ein Projekt, das Jugendlichen beim Start hilft.'],
- ['Dein Lebensbuch weitergeben',0,'Du gibst deine Erfahrungen und Erinnerungen weiter.']]]
-];
-const chapters=[];
-for(const [phase,scene] of scenes.entries()){
- chapters.push({phase,scene});
- for(const [after,age,title,story,choices,income=0] of extra.filter(chapter=>chapter[0]===phase)){
-  chapters.push({phase,mini:true,previewChoices:choices,scene:[age,title,story,()=>(typeof choices==='function'?choices():choices).map(([label,delta,explanation,flag])=>[label,()=>{
-   if(delta>0)earn(delta);
-   const borrowed=delta<0?spend(-delta):0;
-   if(flag==='invest'){state.cash-=6000;state.invest+=6000}
-   else if(flag==='repay'){const paid=Math.min(state.cash,state.debt,4000);state.cash-=paid;state.debt-=paid}
-   else if(flag)state[flag]=true;
-   return explanation+(borrowed?' Dafür kommen '+chf(borrowed)+' Schulden hinzu.':'');
-  }]),()=>earn(income)]});
- }
-}
-const phaseNow=()=>chapters[step]?.phase??scenes.length;
-const hints={
- 1:'Frag dich vor dem Kauf: Wie viel bleibt danach übrig? Und wie lange reicht mein altes Handy noch?',
- 2:'Vergleiche, was dir ein Abschluss eröffnet und was du im Berufseinstieg lernen und verdienen kannst.',
- 3:'Rechne zuerst aus, wie viel Bargeld nach deiner Wahl für eine unerwartete Rechnung bleibt. Der Mini-Erklärfilm zeigt, was Zeit beim Anlegen verändern kann.',
- 4:'Vergleiche die Gesamtkosten. Die Raten kosten 2’000 CHF extra. Ein Verkauf während des Kurstiefs bringt Bargeld, aber dieses Geld kann bei einer Erholung nicht mehr mitwachsen.',
- 5:'Frag dich beim Firmenkredit: Wie viel kann ich zurückzahlen, wenn der Verkauf wenig einbringt? Beim Anlegen kannst du im Mini-Erklärfilm vergleichen, was passiert, wenn die Erträge angelegt bleiben.',
- 6:'Rechne aus, wie viel nach der gewählten Ausgabe für die nächsten Jahre bleibt. Wie viel Spielraum möchtest du behalten?',
- 7:'Schau auf Vermögen und Schulden. Die günstigere Lösung lässt dir mehr Geld. Die teurere erfüllt den Wunsch, länger zu Hause zu bleiben.'
+const days=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+const places={
+ station:{name:'Bahnhof',help:'Bei einer Stornierung bekommst du den Kaufpreis abzüglich 10 CHF zurück. Der Zugpreis steigt ab Donnerstag. Das Ticket gilt für Hin- und Rückfahrt.'},
+ shop:{name:'Laden',help:'Eine Schicht bringt 45 CHF, sobald du sie gearbeitet hast. Die Samstagsschicht fällt in die Turnierzeit. Mit einer Freitagsschicht kannst du verdienen und trotzdem fahren.'},
+ field:{name:'Sportplatz',help:'Der letzte Platz im Teambus ist bis Mittwochabend verfügbar. Reservieren kostet 30 CHF für Hin- und Rückfahrt. Wenn du absagst, gibt es bis Freitag 25 CHF zurück.'}
 };
-let timer=null;
-function stopFilm(){
- if(timer!==null)clearInterval(timer);
- timer=null;el('play').textContent='▶ Abspielen';
+let state;
+function start(){
+ state={day:0,cash:55,place:null,trip:null,shift:null,worked:false,finished:false,won:false};
+ render('Finde eine Hin- und Rückfahrt für Samstag.');
 }
-function drawFilm(){
- const year=Number(el('year').value);
- const compound=1000*1.05**year;
- const simple=1000+50*year;
- const amount=n=>new Intl.NumberFormat('de-CH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)+' CHF';
- el('year-label').textContent='Jahr '+year+' / 20';
- el('compound').value=compound;el('simple').value=simple;
- el('compound-label').textContent=amount(compound);el('simple-label').textContent=amount(simple);
- const captions={
-  0:'Beide starten mit genau 1’000 CHF.',
-  1:'Im ersten Jahr sind es bei beiden 50 CHF Zinsen.',
-  2:'Im zweiten Jahr gibt es oben 5 % auf 1’050 CHF. Das ergibt 52.50 CHF statt 50 CHF.',
-  20:'Nach 20 Jahren hast du oben '+amount(compound-simple)+' mehr. Auch die früheren Zinsen haben Zinsen gebracht.'
- };
- el('caption').textContent=captions[year]??'Bis jetzt sind durch das Wiederanlegen '+amount(compound-simple)+' mehr zusammengekommen.';
+const trainPrice=()=>state.day<3?65:80;
+const busAvailable=()=>state.day<=2;
+function book(mode,price){
+ state.cash-=price;state.trip={mode,price};
+ render(mode+' gebucht. Die Fahrt steht in deinem Plan.');
 }
-el('play').onclick=()=>{
- if(timer!==null){stopFilm();return}
- if(Number(el('year').value)===20){el('year').value=0;drawFilm()}
- el('play').textContent='⏸ Pause';
- timer=setInterval(()=>{
-  const year=Number(el('year').value)+1;
-  el('year').value=year;drawFilm();
-  if(year===20)stopFilm();
- },1600);
-};
-el('replay').onclick=()=>{stopFilm();el('year').value=0;drawFilm();el('play').focus()};
-el('year').oninput=()=>{stopFilm();drawFilm()};
-el('help').ontoggle=()=>{if(!el('help').open)stopFilm()};
-function prepareHelp(){
- const phase=phaseNow();
- const mini=chapters[step]?.mini;
- stopFilm();
- el('help').open=false;el('help').hidden=!mini&&!hints[phase];
- el('hint').textContent=mini?'Vergleiche, was dir jede Option heute bringt und welche Kosten oder Vorteile sie später haben kann.':(hints[phase]??'')+(phase===4&&state.buffer?' Denk an deinen geplanten Notpuffer von 6’000 CHF.':'');
- el('lesson').hidden=mini||(phase!==3&&phase!==5);
- el('year').value=0;drawFilm();
+function cancelTrip(){
+ const fee=state.trip.mode==='Zug'?10:5;
+ state.cash+=state.trip.price-fee;
+ state.trip=null;
+ render('Fahrt storniert. Die Gebühr beträgt '+fee+' CHF.');
 }
-function repay(){const n=Math.min(state.cash,state.debt);state.cash-=n;state.debt-=n}
-function totals(){
- el('age').textContent=step===chapters.length?'90 Jahre':chapters[step].scene[0]+' Jahre';
- el('worth').textContent=chf(worth());
- el('debt').textContent=chf(state.debt);
- el('progress').max=chapters.length;el('progress').value=step;
+function addAction(label,action,disabled=false){
+ const button=document.createElement('button');
+ button.textContent=label;button.disabled=disabled;
+ button.onclick=()=>{action();el('place').focus()};
+ el('actions').append(button);
 }
-function button(label,action,next=false){
- const b=document.createElement('button');b.textContent=label;b.onclick=action;
- if(next)b.className='next';
- el('choices').append(b);return b;
-}
-const art=[
- ['#454583','#a880c8','✦','Ein Stern über Nikis Kinderzimmer','Ein neuer Anfang'],
- ['#563a85','#d589ad','♫','Musik und ein Handy im Jugendzimmer','Neugierig'],
- ['#234d71','#64b8b9','↗','Ein Wegweiser an einer Kreuzung','Unentschlossen'],
- ['#653f63','#e9a572','☕','Eine Tasse im warmen Abendlicht','Voller Tatendrang'],
- ['#293854','#7487ad','ϟ','Ein Gewitter über der Stadt','Angespannt'],
- ['#3e4f68','#99c696','✦','Ein Lichtblick am Horizont','Hoffnungsvoll'],
- ['#684855','#f0a477','☀','Ein Sonnenuntergang im Ruhestand','Nachdenklich'],
- ['#37565a','#8fbca3','⌂','Ein Zuhause im Grünen','Verletzlich'],
- ['#3c385e','#b3a1db','✦','Ein Sternenhimmel über Nikis letztem Kapitel','Ein Leben voller Entscheidungen']
-];
-const reactions=[
- [['Geborgen','Ein kleiner Anfang für später.',1]],
- [['Begeistert','Endlich mein neues Handy!',1],['Stolz','Ich kann warten. Das fühlt sich gut an.',1]],
- [['Entschlossen','Ich probiere etwas Neues.',1],['Zuversichtlich','Jetzt verdiene ich mein eigenes Geld.',1],['Enttäuscht','Ich hatte mir mehr davon versprochen.',-1]],
- [['Gespannt','Wie entwickelt sich meine Anlage?',0],['Aufgeregt','Mein eigenes Café!',1],['Ruhig','Mein Geld bleibt griffbereit.',1]],
- [],
- [['Erleichtert','Jetzt kann ich wieder nach vorn schauen.',1],['Nervös','Was, wenn die Aufträge ausbleiben?',-1],['Ruhig','Ich will vorerst flexibel bleiben.',1]],
- [['Zufrieden','Ich möchte mir Spielraum lassen.',1],['Vorfreude','Darauf habe ich lange gewartet.',1]],
- [['Dankbar','Gut, dass ich Unterstützung bekomme.',1],['Erleichtert','Ich kann zu Hause bleiben.',1]]
-];
-function crisisReaction(index){
- if(state.cafe)return index===0?['Besorgt','Hoffentlich kommen die Gäste zurück.',-1]:['Wehmütig','Es ist schwer, mein Café loszulassen.',-1];
- return index===0?['Überrumpelt','Damit habe ich nicht gerechnet.',-1]:['Unsicher','Ich hoffe, dass das Geld danach reicht.',-1];
-}
-const sceneImages={
- 8:['🧸','🪙','Spielzeug und Münzen am Flohmarkt'],
-
- 17:['🏆','🛍️','Pokal und Einkaufstasche für Turnier und Ladenjob'],
- 19:['🎓','💼','Abschluss und Arbeitstasche'],
- 21:['🔑','🏠','Schlüssel für die erste eigene Wohnung'],
- 24:['🚆','🚲','Zug und Velo für den Arbeitsweg'],
- 26:['📚','🗓️','Kursunterlagen und Schichtkalender'],
- 27:['🧺','🔧','Wäschekorb und Werkzeug'],
- 29:['🗓️','💭','Kalender und Gedanken über die Zukunft'],
- 31:['🗓️','🧸','Wochenplan und Spielzeug für die Kinderbetreuung'],
- 33:['✉️','🏦','Brief der Bank'],
- 37:['💻','🌙','Laptop und Mond für die Arbeit am Abend'],
- 44:['🧾','🪙','Rechnung und Geld nach der Krise'],
- 48:['🤝','🪪','Begrüssung und Namensschild am Branchentreffen'],
- 56:['💛','🏠','Ein Herz für den Jugendtreff'],
- 61:['⏳','💼','Sanduhr und Arbeitstasche für die Wahl zwischen Zeit und Geld'],
- 72:['🎓','🤝','Unterstützung für eine Ausbildung'],
- 77:['🏠','📦','Wohnung und Umzugskarton'],
- 86:['📖','💛','Lebensbuch und ein Geschenk an die nächste Generation']
-};
-function missionScene(age,title){
- if(title==='Zwei Briefe, zwei Wege')return ['POST FÜR NIKI','Lehrbetrieb','Wir bieten dir eine Lehrstelle an.','Gymnasium','Dein Schulplatz ist bestätigt.'];
- if(age===26)return ['KURSPLATZ BIS FREITAG','Kursleitung','Dienstag und Donnerstag · 18 Uhr','Dein Schichtplan','An beiden Abenden arbeitest du.'];
- if(age===29)return ['DEINE PLÄNE','Zeit','Wie möchtest du deinen Alltag gestalten?','Budget','Wofür möchtest du Geld einplanen?'];
- if(age===31)return state.family?
-  ['DEIN WOCHENPLAN','Kita','Donnerstag · kein Platz frei','Betrieb','Neuer Wochenplan bis morgen.']:
-  ['DEIN WOCHENPLAN','Betrieb','Ein freier Tag pro Woche wäre möglich.','Dein Budget','Weniger Pensum heisst weniger Lohn.'];
-}
-function illustrateMission([heading,first,firstText,second,secondText]){
- el('art').innerHTML=`<svg viewBox="0 0 640 260" role="img" aria-label="${heading}. ${firstText} ${secondText}">
-  <rect width="640" height="260" fill="#26254b"/>
-  <circle cx="70" cy="215" r="120" fill="#564681"/>
-  <circle cx="590" cy="55" r="100" fill="#395a62"/>
-  <text x="50" y="44" fill="#dcff90" font-size="24" font-weight="800">${heading}</text>
-  <g class="notification">
-   <rect x="50" y="64" width="540" height="73" rx="14" fill="#3a3861"/>
-   <text x="70" y="92" fill="#dcff90" font-size="22" font-weight="700">${first}</text>
-   <text x="70" y="120" fill="#fff" font-size="22">${firstText}</text>
-  </g>
-  <g class="notification">
-   <rect x="50" y="151" width="540" height="73" rx="14" fill="#dcff90"/>
-   <text x="70" y="179" fill="#151b0a" font-size="22" font-weight="700">${second}</text>
-   <text x="70" y="207" fill="#151b0a" font-size="22">${secondText}</text>
-  </g>
- </svg>`;
-}
-function illustrate(reaction){
- if(chapters[step]?.scene[0]===15){
-  el('art').innerHTML=`<svg viewBox="0 0 640 260" role="img" aria-label="Handy mit fast leerem Akku und zwei Nachrichten aus dem Teamchat">
-   <rect width="640" height="260" fill="#26254b"/>
-   <circle cx="105" cy="200" r="104" fill="#564681"/>
-   <circle cx="563" cy="61" r="83" fill="#395a62"/>
-   <rect x="153" y="17" width="334" height="226" rx="30" fill="#10111c" stroke="#8986ad" stroke-width="3"/>
-   <text x="179" y="54" fill="#f7f4ff" font-size="20" font-weight="700">TEAMCHAT</text>
-   <text x="438" y="54" fill="#ffac9c" text-anchor="end" font-size="20">3 %</text>
-   <g class="notification">
-    <rect x="176" y="73" width="285" height="58" rx="13" fill="#3a3861"/>
-    <text x="190" y="109" fill="#fff" font-size="20">Mia · Bist du am Samstag dabei?</text>
-   </g>
-   <g class="notification">
-    <rect x="176" y="143" width="285" height="58" rx="13" fill="#dcff90"/>
-    <text x="190" y="179" fill="#151b0a" font-size="20">Team · Anmeldung bis 20 Uhr</text>
-   </g>
-   <path d="M288 222h64" stroke="#8986ad" stroke-width="5" stroke-linecap="round"/>
-  </svg><figcaption>Das Team wartet auf deine Antwort.</figcaption>`;
+function renderPlace(){
+ el('actions').replaceChildren();
+ const place=places[state.place];
+ el('info').hidden=!place;
+ if(!place){
+  el('place').textContent='Wohin zuerst?';
+  el('description').textContent='Tippe auf einen Ort und finde heraus, was du dort tun kannst.';
   return;
  }
-
- const [sky,horizon,symbol,description,initial]=art[phaseNow()];
- const [age,title]=chapters[step]?.scene??[];
- const panel=missionScene(age,title);
- if(panel){illustrateMission(panel);return;}
- const image=title==='Zwei Briefe, zwei Wege'?['✉️','🎓','Lehrvertrag und Zusage fürs Gymnasium']:
-  age===16?['🎧','🧾','Kopfhörer und Rechnung fürs Musikabo']:
-  age===31&&!state.family?['🗓️','⏳','Wochenkalender und freie Zeit']:
-  sceneImages[age];
- const [mood,thought,feeling]=reaction??[initial,'',0];
- const older=phaseNow()>=6;
- const mouth=feeling===1?'M 69 91 Q 81 103 93 91':feeling===-1?'M 69 96 Q 81 84 93 96':'M 72 94 H 90';
- el('art').innerHTML=`<svg viewBox="0 0 640 180" role="img" aria-label="${image?.[2]??description}. Niki wirkt ${mood.toLowerCase()}.">
- <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="${horizon}"/></linearGradient></defs>
- <path fill="url(#sky)" d="M0 0h640v180H0z"/><circle cx="490" cy="67" r="45" fill="#fff1c2" opacity=".22"/>
- <path d="M0 153 110 89 205 137 310 73 426 136 554 102 640 130V180H0Z" fill="#202139" opacity=".55"/>
- <path d="M0 166Q155 135 280 161T640 155V180H0Z" fill="#17192c"/>
- <text x="150" y="116" text-anchor="middle" font-size="58">${image?.[0]??''}</text>
- <text x="491"  y="87" text-anchor="middle" font-size="50" fill="#fff5d6">${image?.[1]??symbol}</text>
- <g transform="translate(233 16)">
- <path d="M16 164Q22 112 81 110Q140 112 146 164Z" fill="${phaseNow()===4?'#647da1':'#b3d881'}"/>
- <circle class="face" cx="81" cy="75" r="44" fill="#eeb28e"/>
- <path d="M37 76Q29 22 79 24Q130 25 125 76L111 62 98 45Q81 66 44 63Z" fill="${older?'#e4e0e9':'#372638'}"/>
- <circle cx="64" cy="78" r="3.5" fill="#332236"/><circle cx="98" cy="78" r="3.5" fill="#332236"/>
- <path d="${mouth}" fill="none" stroke="#613b49" stroke-width="3" stroke-linecap="round"/>
- </g></svg><figcaption></figcaption>`;
- el('art').querySelector('figcaption').textContent=thought?'Niki · '+mood+' — «'+thought+'»':'Niki · '+mood;
-}
-const phonePlans=[
- {id:'repair',label:'Akku ersetzen',cost:120,note:'Du behältst dein Handy. Der Laden hat den Akku bis Samstag ausgetauscht.'},
- {id:'buy',label:'Gebrauchtes Handy kaufen',cost:650,note:'Du hast sofort ein funktionierendes Handy und weniger Geld für später.'},
- {id:'borrow',label:'Handy ausleihen',cost:0,note:'Du sparst das Geld. Am Freitag musst du das Handy zurückgeben und den Treffpunkt vorher abmachen.'}
-];
-function previewMission(plans,commit){
- const mission=el('mission');
- mission.innerHTML='<fieldset class="mission"><legend>Teste deinen Plan</legend><div></div><progress aria-label="Geld nach der Auswahl"></progress><output aria-live="polite"></output></fieldset>';
- const list=mission.querySelector('fieldset div');
- const bar=mission.querySelector('progress');
- const preview=mission.querySelector('output');
- let selected;
- const confirm=button('Plan festlegen',()=>commit(selected.label,selected.action,selected.index),true);
- confirm.disabled=true;
- bar.max=Math.max(1,state.cash+Math.max(0,...plans.map(plan=>plan.delta)));
- bar.value=state.cash;
- preview.textContent='Verfügbar · '+chf(state.cash);
- for(const plan of plans){
-  const label=document.createElement('label');
-  const radio=document.createElement('input');
-  radio.type='radio';
-  radio.name='mission-plan';
-  radio.onchange=()=>{
-   selected=plan;
-   const balance=state.cash+plan.delta;
-   bar.value=Math.max(0,balance);
-   preview.textContent='Übrig · '+chf(bar.value)+(balance<0?' · Neue Schulden '+chf(-balance):'')+' · '+plan.note;
-   preview.classList.remove('budget-change');
-   void preview.offsetWidth;
-   preview.classList.add('budget-change');
-   confirm.disabled=false;
-  };
-  label.append(radio,plan.label);
-  list.append(label);
- }
-}
-function phoneMission(commit){
- previewMission(phonePlans.map(({id,label,cost,note})=>({
-  label:label+' · '+chf(cost),delta:-cost,note,action:()=>{
-   spend(cost);
-   state.phone=id;
-   return note;
+ el('place').textContent=place.name;
+ if(state.place==='station'){
+  const price=trainPrice();
+  el('description').textContent='Zug hin und zurück · '+price+' CHF. '+(state.day<3?'Ab Donnerstag kostet das Ticket 80 CHF.':'Der Frühpreis ist abgelaufen.');
+  if(!state.finished){
+   if(state.trip?.mode==='Zug')addAction('Zugticket stornieren · 10 CHF Gebühr',cancelTrip);
+   else addAction('Zugticket kaufen · '+price+' CHF',()=>book('Zug',price),Boolean(state.trip)||state.cash<price);
   }
- })),commit);
-}
-function render(){
- prepareHelp();illustrate();
- el('choices').replaceChildren();el('mission').replaceChildren();el('result').textContent='';
- if(step===chapters.length){
-  const n=worth();
-  el('chapter').textContent='LETZTES KAPITEL · 90 JAHRE';
-  illustrate(n<0?['Bedrückt','Die Schulden haben mich lange begleitet.',-1]:['Nachdenklich','So viele kleine Entscheidungen, so viele Wendungen.',1]);
-  el('title').textContent=n>=1000000?'Millionär':n<0?'Konkurs im Spiel':n>=250000?'Mit einem Polster':'Mit kleinem Spielraum';
-  el('story').textContent='Nikis Leben endet mit 90. Die Schlussbilanz beträgt '+chf(n)+'. Welche Entscheidung hat den grössten Unterschied gemacht? Wähle in der nächsten Runde einen anderen Weg und vergleiche.';
-  const path=state.apprentice?'Lehre':'Gymnasium';
-  const family=state.family?'mit Kind':state.undecided?'Familienplanung offengelassen':'kinderfrei';
-  const summary=path+', '+family+' · '+chf(n);
-  el('result').textContent='Dieser Durchlauf · '+summary+(previousRun?' | Vorheriger Durchlauf · '+previousRun:'');
-  button('Ein neues Leben starten',()=>{previousRun=summary;start()},true);
- }else{
-  const {scene,phase,mini,previewChoices}=chapters[step];
-  const [age,title,story,options,enter]=scene;enter?.();
-  el('chapter').textContent='KAPITEL '+(step+1)+' / '+chapters.length+' · '+age+' JAHRE';
-  el('title').textContent=title;el('story').textContent=typeof story==='function'?story():story;
-  const available=typeof options==='function'?options():options;
-  const commit=(label,action,index)=>{
-    const before=worth(), explanation=action(), delta=worth()-before;
-    const impact=delta===0?'Vermögen in diesem Zug unverändert.':'Vermögen in diesem Zug '+(delta>0?'+':'−')+chf(Math.abs(delta))+'.';
-    if(age!==15&&!missionScene(age,title))illustrate(mini?[delta<0?'Nachdenklich':'Zuversichtlich',delta<0?'Das war mir etwas wert.':'Mal sehen, was daraus wird.',delta<0?0:1]:phase===4?crisisReaction(index):reactions[phase][index]);
-    el('result').textContent=explanation+' '+impact;
-    const li=document.createElement('li');li.textContent=age+' Jahre · '+label+' — '+explanation;el('log').append(li);
-    totals();el('mission').replaceChildren();el('choices').replaceChildren();button('Weiter →',()=>{step++;render()},true).focus();
-  };
-  if(age===15)phoneMission(commit);
-  else if(missionScene(age,title)){
-   const choices=typeof previewChoices==='function'?previewChoices():previewChoices;
-   previewMission(choices.map(([label,delta,note],index)=>({label,delta,note,index,action:available[index][1]})),commit);
-  }else for(const [index,[label,action]] of available.entries())button(label,()=>commit(label,action,index));
  }
- totals();el('title').focus();
+ if(state.place==='shop'){
+  el('description').textContent='Eine Schicht bringt 45 CHF. Am Samstag arbeitest du zur gleichen Zeit, wie das Turnier stattfindet.';
+  if(!state.finished&&!state.worked){
+   for(const shift of [4,5]){
+    if(shift<state.day)continue;
+    if(state.shift===shift)addAction(days[shift]+' absagen',()=>{state.shift=null;render('Schicht abgesagt.')});
+    else addAction(days[shift]+' eintragen · +45 CHF',()=>{state.shift=shift;render('Schicht für '+days[shift]+' eingetragen.')});
+   }
+  }
+ }
+ if(state.place==='field'){
+  el('description').textContent=busAvailable()?'Ein Sitz im Teambus ist frei. Hin und zurück für 30 CHF. Reserviere bis Mittwochabend.':'Die Frist für neue Reservierungen ist abgelaufen.';
+  if(!state.finished){
+   if(state.trip?.mode==='Teambus'&&state.day<5)addAction('Busplatz abgeben · 5 CHF Gebühr',cancelTrip);
+   else if(busAvailable())addAction('Busplatz reservieren · 30 CHF',()=>book('Teambus',30),Boolean(state.trip)||state.cash<30);
+  }
+ }
 }
-function start(){state={cash:0,debt:0,invest:0};step=0;el('log').replaceChildren();el('journal').open=false;render()}
+function render(message){
+ el('day').textContent=days[state.day]+' · '+(state.day+1)+'/6';
+ el('cash').textContent=state.cash+' CHF';
+ el('plan').textContent=(state.trip?state.trip.mode+' gebucht':'Keine Fahrt gebucht')+' · '+(state.worked?'Schicht bezahlt':state.shift===null?'Keine Schicht':days[state.shift]+' · Schicht geplant');
+ el('next').hidden=state.finished;
+ el('next').textContent=state.day===5?'Samstag abschliessen →':'Nächster Tag →';
+ el('hint').hidden=state.finished;
+ el('reset').hidden=!state.finished;
+ el('arrival').toggleAttribute('hidden',!state.won);
+ for(const id of Object.keys(places))el(id).setAttribute('aria-pressed',String(state.place===id));
+ renderPlace();
+ if(message!==undefined){
+  el('feedback').textContent=message;
+  el('feedback').classList.remove('arrive');
+  void el('feedback').offsetWidth;
+  el('feedback').classList.add('arrive');
+ }
+}
+function advance(){
+ if(state.finished)return;
+ let message='';
+ if(state.shift===state.day&&!state.worked){
+  state.cash+=45;state.worked=true;message='Schicht erledigt. +45 CHF. ';
+ }
+ if(state.day===5){
+  state.finished=true;state.won=Boolean(state.trip)&&state.shift!==5;
+  const result=state.won?'Du bist mit dem '+state.trip.mode+' am Turnier angekommen.':state.shift===5?'Deine Schicht fiel aufs Turnier.':'Ohne gebuchte Fahrt hast du das Turnier verpasst.';
+  render(message+result+' Übrig: '+state.cash+' CHF.'+(state.won&&state.cash>=30?' Bonusziel erreicht!':''));
+  el('reset').focus();
+  return;
+ }
+ state.day++;
+ if(state.day===3&&!state.trip)message+='Die Busfrist ist abgelaufen. Schau beim Bahnhof nach.';
+ render(message||days[state.day]+' hat begonnen.');
+}
+function showHelp(title,body){
+ el('help-title').textContent=title;el('help-text').textContent=body;el('help').showModal();
+}
+for(const id of Object.keys(places))el(id).onclick=()=>{state.place=id;render();el('place').focus()};
+el('place').tabIndex=-1;
+el('next').onclick=advance;
+el('reset').onclick=()=>{start();el('station').focus()};
+el('info').onclick=()=>showHelp(places[state.place].name+' · Kurz erklärt',places[state.place].help);
+el('hint').onclick=()=>{
+ const tip=state.shift===5?'Schau im Laden nach, ob du die Samstagsschicht absagen kannst.':state.trip?'Deine Fahrt steht. Schau im Laden, ob du dein Bonusziel noch erreichen kannst.':busAvailable()?'Frag beim Sportplatz nach dem freien Sitz im Teambus.':state.cash>=trainPrice()?'Am Bahnhof kannst du noch ein Ticket für Samstag kaufen.':state.day<=4?'Schau im Laden nach, ob du vor Samstag noch 45 CHF verdienen kannst.':'Überlege in der nächsten Runde, welche Frist du früher nutzen kannst.';
+ showHelp('Ein Tipp',tip);
+};
 start();
-</script></html>
+</script>
+</body></html>
