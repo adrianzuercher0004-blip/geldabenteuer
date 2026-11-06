@@ -27,7 +27,7 @@
 <script>
 const el=id=>document.getElementById(id);
 const chf=n=>new Intl.NumberFormat('de-CH').format(n)+' CHF';
-let state,step;
+let state,step,previousRun;
 const worth=()=>state.cash+state.invest-state.debt;
 function spend(n){
  const paid=Math.min(state.cash,n);
@@ -37,17 +37,17 @@ function spend(n){
 }
 function earn(n){state.cash+=n}
 const scenes=[
- [0,'Hallo, Niki','Du kommst zur Welt. Deine Familie eröffnet ein Sparkonto und legt bis zu deinem 15. Geburtstag insgesamt 500 CHF für dich zurück.',[
- ['15 Jahre vorspulen',()=>{earn(500);return 'Deine erste Chance, selbst über Geld zu entscheiden.'}]]],
+ [0,'Hallo, Niki','Du kommst zur Welt. Deine Familie eröffnet ein Sparkonto und legt 500 CHF für deinen 15. Geburtstag zurück.',[
+ ['Bis zum Flohmarkt mit 8 vorspulen',()=> 'Mit 8 entscheidest du zum ersten Mal selbst über dein Geld.']]],
  [15,'Das erste eigene Geld','Du verdienst in den Ferien 300 CHF. Ein neues Handy kostet 650 CHF. Dein altes funktioniert noch.',[
  ['Handy kaufen · 650 CHF',()=>{earn(300);spend(650);return 'Du hast ein neues Handy. Nach dem Kauf bleiben dir '+chf(state.cash)+' für den nächsten Abschnitt.'}],
- ['Handy behalten · 300 CHF sparen',()=>{earn(300);return 'Du hast '+chf(state.cash)+' auf der Seite. Ein Teil davon kann deinen nächsten Schritt finanzieren.'}]]],
- [19,'Die Weiche','Du kannst eine Weiterbildung machen, direkt arbeiten oder ein Business-Coaching buchen, das schnellen Reichtum verspricht.',[
- ['Weiterbildung · 600 CHF',()=>{state.training=true;const loan=spend(600);return 'Du erwirbst eine Qualifikation. Ab 30 bleibt dir im Spiel mehr vom Einkommen übrig.'+(loan?' Dafür nimmst du '+chf(loan)+' Schulden auf.':' Du bezahlst den Kurs aus deinen Ersparnissen.')}],
- ['Direkt arbeiten · 1’000 CHF zurücklegen',()=>{earn(1000);return 'Du hast sofort mehr Geld und Berufserfahrung. Deine spätere Sparrate im Spiel ist tiefer.'}],
- ['Coaching buchen · 2’000 CHF',()=>{const loan=spend(2000);return 'Das Coaching bringt keine Aufträge. Du startest mit '+chf(loan)+' Schulden in den nächsten Abschnitt.'}]]],
+ ['Handy behalten · 300 CHF sparen',()=>{earn(300);return 'Du hast '+chf(state.cash)+' auf der Seite. Ein Teil davon kann deinen nächsten Schritt finanzieren.'}]],()=>earn(500)],
+ [19,'Nach der Ausbildung',()=>state.apprentice?'Du hast deine Lehre abgeschlossen. Dein Betrieb bietet dir einen Einstiegsjob an. Oder du machst berufsbegleitend die Berufsmaturität.':'Nach der Matura hast du einen Studienplatz. Daneben liegt ein Angebot für ein bezahltes Praktikum.',()=>[
+  [state.apprentice?'Berufsmaturität beginnen':'Studium beginnen',()=>{state.training=true;spend(600);return 'Du investierst 600 CHF in deinen nächsten Ausbildungsschritt. Im Spiel erhöht dieser Abschluss später deine Sparmöglichkeiten.'}],
+  [state.apprentice?'Im Lehrbetrieb einsteigen':'Das Praktikum antreten',()=>{earn(1000);return 'Du sammelst Berufserfahrung und legst 1’000 CHF zurück.'}]
+ ]],
  [30,'Der erste grosse Plan',()=> 'Nach Lohn und Lebenshaltungskosten konntest du bis heute '+chf(state.training?36000:20000)+' zurücklegen. Jetzt steht eine Entscheidung an.',[
- ['Breit gestreut anlegen · 15’000 CHF',()=>{state.cash-=15000;state.invest=15000;return 'Du hast 15’000 CHF investiert. Bei einem Kursrückgang kann der Wert sinken, während dein übriges Geld verfügbar bleibt.'}],
+ ['Breit gestreut anlegen · bis zu 15’000 CHF',()=>{const amount=Math.min(state.cash,15000);state.cash-=amount;state.invest=amount;return 'Du hast '+chf(amount)+' investiert. Bei einem Kursrückgang kann der Wert sinken, während dein übriges Geld verfügbar bleibt.'}],
  ['30’000 CHF für ein Café auf Kredit aufnehmen',()=>{state.debt+=30000;state.cafe=true;return 'Du eröffnest dein eigenes Café. Die 30’000 CHF stecken im Betrieb und erscheinen im Spiel erst beim Verkauf wieder als Vermögen.'}],
  ['Liquid bleiben · Geld auf dem Konto behalten',()=> 'Dein Geld ist für unerwartete Ausgaben verfügbar. Im Spiel bringt es auf dem Konto keinen Zins.']],
  ()=>earn(state.training?36000:20000)],
@@ -93,6 +93,9 @@ const extra=[
  [1,16,'Der erste Dauerauftrag','Ein Musikabo kostet 12 CHF im Monat. Du entscheidest für ein Jahr.',[
  ['Abo abschliessen',-144,'Einzeln wirken 12 CHF klein. In zwölf Monaten werden daraus 144 CHF.'],
  ['Gratisversion nutzen',0,'Du hörst Musik mit Werbung und behältst 144 CHF.']]],
+ [1,16,'Zwei Briefe, zwei Wege','Dein Schnupperbetrieb bietet dir eine Lehrstelle an. Gleichzeitig hast du einen Platz am Gymnasium. Welcher Weg passt zu dem, was du lernen möchtest?',[
+ ['Lehrstelle annehmen',800,'Du lernst im Betrieb und legst im Spiel 800 CHF vom Lehrlingslohn zurück.','apprentice'],
+ ['Ans Gymnasium gehen',0,'Du arbeitest auf die Matura hin und hältst dir den Weg zum Studium offen.']]],
  [1,17,'Ein Samstag mit zwei Plänen','Ein Laden zahlt dir 180 CHF für einen Zusatzjob. Gleichzeitig findet ein Turnier mit deinen Freunden statt.',[
  ['Den Job übernehmen',180,'Du verdienst 180 CHF, verpasst aber das Turnier.'],
  ['Beim Turnier mitspielen',0,'Du erlebst einen besonderen Tag mit deinem Team.']]],
@@ -102,14 +105,30 @@ const extra=[
  [2,24,'Ein Pendel-Dilemma','Dein neues Team arbeitet ausserhalb der Stadt. Für dieses Jahr hast du 3’000 CHF für den Arbeitsweg übrig.',[
  ['ÖV und Velo kombinieren',-1200,'Du sparst 1’800 CHF. Der Weg braucht mehr Zeit.'],
  ['Ein günstiges Auto nutzen',-3000,'Du bist flexibler, verbrauchst aber das gesamte Pendelbudget.']],3000],
+ [2,26,'Kursplatz bis Freitag','Eine Weiterbildung könnte dir den Wechsel ins Projektteam ermöglichen. Zwei Kursabende fallen auf deine Schichten. Der Kurs kostet 1’200 CHF.',[
+ ['Mit dem Betrieb verhandeln',-600,'Dein Betrieb übernimmt die Hälfte. Dafür tauscht du zwei Schichten. Im Projektteam kannst du im Spiel später mehr zurücklegen.','training'],
+ ['Selbst bezahlen',-1200,'Du bezahlst den ganzen Kurs und tauschst deine Schichten. Der Abschluss öffnet dir im Spiel den Weg ins Projektteam.','training'],
+ ['Die nächste Ausschreibung abwarten',0,'Du behältst Geld und freie Abende und bleibst vorerst in deiner Rolle.']]],
  [2,27,'Eine Rechnung, zwei Wege','Eine kaputte Waschmaschine muss ersetzt werden. Du kannst eine geprüfte gebrauchte nehmen oder eine neue mit längerer Garantie.',[
  ['Gebraucht kaufen',-300,'Du sparst 450 CHF. Die Garantie ist kürzer.'],
  ['Neu kaufen',-750,'Die längere Garantie gibt dir Sicherheit, kostet aber mehr.']]],
+ [2,29,'Platz für Zukunftspläne','Du überlegst, wie du in den nächsten Jahren leben möchtest. Ob du Kinder möchtest, entscheidest du selbst. Was planst du in dieser Runde?',[
+ ['Ein Kind einplanen',0,'Du rechnest damit, dass Betreuung und Arbeit bald aufeinander abgestimmt werden müssen.','family'],
+ ['Später entscheiden',0,'Du hältst dir die Entscheidung offen und planst vorerst mit deinem heutigen Alltag.','undecided'],
+ ['Kinderfrei leben',0,'Du planst deine Zeit und dein Geld für andere Ziele.']]],
+ [3,31,'Wer hat am Donnerstag Zeit?',()=>state.family?'Ein Kind gehört jetzt zu deinem Alltag. Die Kita hat am Donnerstag keinen Platz. Dein Betrieb braucht bis morgen einen neuen Wochenplan.':state.undecided?'Dein Betrieb bietet dir einen freien Tag pro Woche bei kleinerem Pensum. Möchtest du dir Zeit für deine nächsten Schritte freihalten?':'Dein Betrieb bietet dir einen freien Tag pro Woche bei kleinerem Pensum. Möchtest du ihn für ein eigenes Projekt nutzen?',()=>state.family?[
+ ['Betreuung teilen · 2’400 CHF',-2400,'Du teilst den Donnerstag mit einer vertrauten Person und bezahlst für weitere Betreuungstage. Dein Pensum bleibt gleich.'],
+ ['Pensum senken · 4’800 CHF weniger Einkommen',-4800,'Du übernimmst den Donnerstag. In diesem Spieljahr bleiben dir 4’800 CHF weniger.','freeDay'],
+ ['Zusätzliche Betreuung buchen · 3’600 CHF',-3600,'Du organisierst Betreuung am Donnerstag und behältst dein Pensum.']
+ ]:[
+ ['Pensum senken · 4’800 CHF weniger Einkommen',-4800,'Du gewinnst einen freien Tag pro Woche für deine Pläne.','freeDay'],
+ ['Pensum behalten',0,'Du behältst dein Einkommen und planst deine Vorhaben rund um die Arbeit.']
+ ],4800],
  [3,33,'Ein Brief von der Bank','In den letzten drei Jahren sind 6’000 CHF zusätzlich übrig geblieben. Was machst du damit?',[
  ['Eine Notreserve trennen',0,'Du legst 6’000 CHF im Kopf für die Krise zurück. Bei der nächsten Überraschung erinnert dich das Spiel daran.','buffer'],
  ['Eine Reise machen',-4200,'Du gönnst dir eine Auszeit. 1’800 CHF bleiben von diesem Überschuss.'],
  ['Mehr investieren',0,'Du verschiebst 6’000 CHF vom Konto in Anlagen. Das Geld kann an Wert gewinnen oder verlieren.','invest']],6000],
- [3,37,'Ein Angebot am Abend','Eine Bekannte bietet dir 2’800 CHF für ein Nebenprojekt. Es beansprucht viele Abende.',[
+ [3,37,'Ein Angebot am Abend',()=> 'Eine Bekannte bietet dir 2’800 CHF für ein Nebenprojekt. Es beansprucht viele Abende.'+(state.family?' Wer übernimmt dann die Betreuung?':state.freeDay?' Du hast dir bewusst mehr Zeit freigehalten. Ist der Auftrag es wert?':''),[
  ['Den Auftrag annehmen',2800,'Du verdienst 2’800 CHF und lernst, einen Auftrag zu planen. Diese Erfahrung hilft später beim Aufbau einer Firma.','network'],
  ['Die Abende freihalten',0,'Du behältst Zeit für Erholung und Freunde.']]],
  [4,44,'Nach dem Schock','Du erhältst 4’000 CHF aus einem Zusatzauftrag. Jetzt entscheidest du, wie du sie einsetzt.',[
@@ -139,7 +158,7 @@ const chapters=[];
 for(const [phase,scene] of scenes.entries()){
  chapters.push({phase,scene});
  for(const [after,age,title,story,choices,income=0] of extra.filter(chapter=>chapter[0]===phase)){
-  chapters.push({phase,mini:true,scene:[age,title,story,choices.map(([label,delta,explanation,flag])=>[label,()=>{
+  chapters.push({phase,mini:true,scene:[age,title,story,()=>(typeof choices==='function'?choices():choices).map(([label,delta,explanation,flag])=>[label,()=>{
    if(delta>0)earn(delta);
    const borrowed=delta<0?spend(-delta):0;
    if(flag==='invest'){state.cash-=6000;state.invest+=6000}
@@ -152,7 +171,7 @@ for(const [phase,scene] of scenes.entries()){
 const phaseNow=()=>chapters[step]?.phase??scenes.length;
 const hints={
  1:'Frag dich vor dem Kauf: Wie viel bleibt danach übrig? Und wie lange reicht mein altes Handy noch?',
- 2:'Vergleiche die Kosten heute mit den möglichen Vorteilen in ein paar Jahren. Was weisst du über den Kurs, bevor du zahlst?',
+ 2:'Vergleiche, was dir ein Abschluss eröffnet und was du im Berufseinstieg lernen und verdienen kannst.',
  3:'Rechne zuerst aus, wie viel Bargeld nach deiner Wahl für eine unerwartete Rechnung bleibt. Der Mini-Erklärfilm zeigt, was Zeit beim Anlegen verändern kann.',
  4:'Vergleiche die Gesamtkosten. Die Raten kosten 2’000 CHF extra. Ein Verkauf während des Kurstiefs bringt Bargeld, aber dieses Geld kann bei einer Erholung nicht mehr mitwachsen.',
  5:'Frag dich beim Firmenkredit: Wie viel kann ich zurückzahlen, wenn der Verkauf wenig einbringt? Beim Anlegen kannst du im Mini-Erklärfilm vergleichen, was passiert, wenn die Erträge angelegt bleiben.',
@@ -239,17 +258,44 @@ function crisisReaction(index){
  if(state.cafe)return index===0?['Besorgt','Hoffentlich kommen die Gäste zurück.',-1]:['Wehmütig','Es ist schwer, mein Café loszulassen.',-1];
  return index===0?['Überrumpelt','Damit habe ich nicht gerechnet.',-1]:['Unsicher','Ich hoffe, dass das Geld danach reicht.',-1];
 }
+const sceneImages={
+ 8:['🧸','🪙','Spielzeug und Münzen am Flohmarkt'],
+ 15:['📱','🪙','Handy und Geld aus dem Ferienjob'],
+ 17:['🏆','🛍️','Pokal und Einkaufstasche für Turnier und Ladenjob'],
+ 19:['🎓','💼','Abschluss und Arbeitstasche'],
+ 21:['🔑','🏠','Schlüssel für die erste eigene Wohnung'],
+ 24:['🚆','🚲','Zug und Velo für den Arbeitsweg'],
+ 26:['📚','🗓️','Kursunterlagen und Schichtkalender'],
+ 27:['🧺','🔧','Wäschekorb und Werkzeug'],
+ 29:['🗓️','💭','Kalender und Gedanken über die Zukunft'],
+ 31:['🗓️','🧸','Wochenplan und Spielzeug für die Kinderbetreuung'],
+ 33:['✉️','🏦','Brief der Bank'],
+ 37:['💻','🌙','Laptop und Mond für die Arbeit am Abend'],
+ 44:['🧾','🪙','Rechnung und Geld nach der Krise'],
+ 48:['🤝','🪪','Begrüssung und Namensschild am Branchentreffen'],
+ 56:['💛','🏠','Ein Herz für den Jugendtreff'],
+ 61:['⏳','💼','Sanduhr und Arbeitstasche für die Wahl zwischen Zeit und Geld'],
+ 72:['🎓','🤝','Unterstützung für eine Ausbildung'],
+ 77:['🏠','📦','Wohnung und Umzugskarton'],
+ 86:['📖','💛','Lebensbuch und ein Geschenk an die nächste Generation']
+};
 function illustrate(reaction){
  const [sky,horizon,symbol,description,initial]=art[phaseNow()];
+ const [age,title]=chapters[step]?.scene??[];
+ const image=title==='Zwei Briefe, zwei Wege'?['✉️','🎓','Lehrvertrag und Zusage fürs Gymnasium']:
+  age===16?['🎧','🧾','Kopfhörer und Rechnung fürs Musikabo']:
+  age===31&&!state.family?['🗓️','⏳','Wochenkalender und freie Zeit']:
+  sceneImages[age];
  const [mood,thought,feeling]=reaction??[initial,'',0];
  const older=phaseNow()>=6;
  const mouth=feeling===1?'M 69 91 Q 81 103 93 91':feeling===-1?'M 69 96 Q 81 84 93 96':'M 72 94 H 90';
- el('art').innerHTML=`<svg viewBox="0 0 640 180" role="img" aria-label="${description}. Niki wirkt ${mood.toLowerCase()}.">
+ el('art').innerHTML=`<svg viewBox="0 0 640 180" role="img" aria-label="${image?.[2]??description}. Niki wirkt ${mood.toLowerCase()}.">
  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="${horizon}"/></linearGradient></defs>
  <path fill="url(#sky)" d="M0 0h640v180H0z"/><circle cx="490" cy="67" r="45" fill="#fff1c2" opacity=".22"/>
  <path d="M0 153 110 89 205 137 310 73 426 136 554 102 640 130V180H0Z" fill="#202139" opacity=".55"/>
  <path d="M0 166Q155 135 280 161T640 155V180H0Z" fill="#17192c"/>
- <text x="491" y="87" text-anchor="middle" font-size="50" fill="#fff5d6">${symbol}</text>
+ <text x="150" y="116" text-anchor="middle" font-size="58">${image?.[0]??''}</text>
+ <text x="491"  y="87" text-anchor="middle" font-size="50" fill="#fff5d6">${image?.[1]??symbol}</text>
  <g transform="translate(233 16)">
  <path d="M16 164Q22 112 81 110Q140 112 146 164Z" fill="${phaseNow()===4?'#647da1':'#b3d881'}"/>
  <circle class="face" cx="81" cy="75" r="44" fill="#eeb28e"/>
@@ -268,7 +314,11 @@ function render(){
   illustrate(n<0?['Bedrückt','Die Schulden haben mich lange begleitet.',-1]:['Nachdenklich','So viele kleine Entscheidungen, so viele Wendungen.',1]);
   el('title').textContent=n>=1000000?'Millionär':n<0?'Konkurs im Spiel':n>=250000?'Mit einem Polster':'Mit kleinem Spielraum';
   el('story').textContent='Nikis Leben endet mit 90. Die Schlussbilanz beträgt '+chf(n)+'. Welche Entscheidung hat den grössten Unterschied gemacht? Wähle in der nächsten Runde einen anderen Weg und vergleiche.';
-  button('Ein neues Leben starten',start,true);
+  const path=state.apprentice?'Lehre':'Gymnasium';
+  const family=state.family?'mit Kind':state.undecided?'Familienplanung offengelassen':'kinderfrei';
+  const summary=path+', '+family+' · '+chf(n);
+  el('result').textContent='Dieser Durchlauf · '+summary+(previousRun?' | Vorheriger Durchlauf · '+previousRun:'');
+  button('Ein neues Leben starten',()=>{previousRun=summary;start()},true);
  }else{
   const {scene,phase,mini}=chapters[step];
   const [age,title,story,options,enter]=scene;enter?.();
